@@ -2,6 +2,7 @@ import Button from "@/components/ui/Button";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import UserMenu from "@/components/UserMenu";
+import Hero from "@/components/Hero";
 
 export default async function Home() {
   const supabase = await createClient();
@@ -11,7 +12,7 @@ export default async function Home() {
   return (
     <main>
       {/* HERO */}
-      <section
+      {/* <section
         className="min-h-[80vh] flex flex-col items-center justify-center text-center px-6 
         bg-linear-to-b from-blue-50 to-white dark:from-gray-900 dark:to-gray-800"
       >
@@ -36,7 +37,10 @@ export default async function Home() {
         )}
         </div>
         
-      </section>
+      </section> */}
+      <Hero/>
+
+
 
       {/* HOW IT WORKS */}
       <section className="py-20 px-6 max-w-6xl mx-auto">
