@@ -7,7 +7,8 @@ interface ButtonProps {
   variant?: "primary" | "secondary"
   disabled?: boolean
   loading?: boolean
-  onClick?: () => void
+  loadingContent?: React.ReactNode
+  onClick?: React.MouseEventHandler<HTMLButtonElement>
   className?: string
 }
 
@@ -16,6 +17,7 @@ export default function Button({
   variant = "primary",
   disabled = false,
   loading = false,
+  loadingContent,
   onClick,
   className = "",
 }: ButtonProps) {
@@ -25,7 +27,7 @@ export default function Button({
 
   const styles = {
     primary:
-      "bg-blue-600 text-white hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600",
+      "bg-[#238636] text-white hover:bg-green-600 dark:bg-[#238636] dark:hover:bg-green-600",
     secondary:
       "bg-gray-200 text-gray-900 hover:bg-gray-300 dark:bg-gray-700 dark:text-white",
   }
@@ -35,10 +37,10 @@ export default function Button({
       onClick={onClick}
       disabled={disabled || loading}
       className={`${base} ${styles[variant]} ${
-        disabled ? "opacity-50 cursor-not-allowed" : ""
+        disabled || loading ? "opacity-50 cursor-not-allowed" : ""
       } ${className}`}
     >
-      {loading ? "Loading..." : children}
+      {loading ? loadingContent ?? "Loading..." : children}
     </button>
   )
 }

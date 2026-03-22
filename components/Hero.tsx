@@ -1,5 +1,6 @@
 import Link from "next/link"
 import Button from "@/components/ui/Button";
+
 export default function Hero({ user }: { user?: boolean }) {
   return (
     <section className="w-full bg-[#0B1220] text-white">
@@ -40,7 +41,7 @@ export default function Hero({ user }: { user?: boolean }) {
             ) : (
               <Link
                 href="/login"
-                className="bg-green-500 hover:bg-green-600 px-6 py-3 rounded-md font-medium"
+                className="bg-[#238636] hover:bg-green-600 px-6 py-3 rounded-md font-medium"
               >
                 Login with Github
               </Link>
