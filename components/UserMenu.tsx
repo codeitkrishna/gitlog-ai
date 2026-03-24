@@ -1,3 +1,5 @@
+// components/UserMenu.tsx
+
 'use client'
 
 import { useState } from 'react'
@@ -35,7 +37,7 @@ export default function UserMenu({ user }: { user: User }) {
             className="w-8 h-8 rounded-full"
           />
         ) : (
-          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-medium text-sm">
+          <div className="w-8 h-8 rounded-full bg-linear-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-medium text-sm">
             {user.user_metadata?.user_name?.[0]?.toUpperCase() || user.email?.[0]?.toUpperCase() || 'U'}
           </div>
         )}

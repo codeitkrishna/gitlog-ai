@@ -1,17 +1,85 @@
 'use client'
+
 import { useState } from 'react'
 import DateRangeSelector from '@/components/DateRangeSelector'
+import TagSelector from '@/components/TagSelector'
+import CommitList from '@/components/CommitList'
+import type { CommitData } from '@/types/github'
+
 interface GeneratorClientProps {
   owner: string
   repo: string
 }
 
+type RangeMode = 'date' | 'tag'
+type Tone = 'technical' | 'user-friendly' | 'marketing'
+type FetchStatus = 'idle' | 'loading' | 'success' | 'error'
+
 export default function GeneratorClient({ owner, repo }: GeneratorClientProps) {
+  // Range state
+  const [rangeMode, setRangeMode] = useState<RangeMode>('date')
   const [dateRange, setDateRange] = useState<{ from: Date | null; to: Date | null }>({
     from: null,
     to: null,
   })
-  const [tone, setTone] = useState<'technical' | 'user-friendly' | 'marketing'>('technical')
+  const [fromTag, setFromTag] = useState<string | null>(null)
+  const [toTag, setToTag] = useState<string | null>(null)
+
+  // Tone state
+  const [tone, setTone] = useState<Tone>('technical')
+
+  // Commits state
+  const [commits, setCommits] = useState<CommitData[]>([])
+  const [wasTruncated, setWasTruncated] = useState(false)
+  const [fetchStatus, setFetchStatus] = useState<FetchStatus>('idle')
+  const [fetchError, setFetchError] = useState<string | null>(null)
+
+  // Validation — is the form ready to submit?
+  const canFetch =
+    rangeMode === 'date'
+      ? dateRange.from !== null && dateRange.to !== null
+      : fromTag !== null && toTag !== null
+
+  const handleFetch = async () => {
+    if (!canFetch) return
+
+    try {
+      setFetchStatus('loading')
+      setFetchError(null)
+      setCommits([])
+
+      const body =
+        rangeMode === 'date'
+          ? {
+              since: dateRange.from!.toISOString(),
+              until: dateRange.to!.toISOString(),
+            }
+          : {
+              fromTag,
+              toTag,
+            }
+
+      const response = await fetch(`/api/repos/${owner}/${repo}/commits`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.message || data.error || 'Failed to fetch commits')
+      }
+
+      setCommits(data.commits)
+      setWasTruncated(data.wasTruncated)
+      setFetchStatus('success')
+
+    } catch (err) {
+      setFetchError(err instanceof Error ? err.message : 'Something went wrong')
+      setFetchStatus('error')
+    }
+  }
 
   return (
     <div className="min-h-screen bg-[#0d1117] text-[#c9d1d9]">
@@ -45,13 +113,55 @@ export default function GeneratorClient({ owner, repo }: GeneratorClientProps) {
                 </div>
               </div>
 
-              {/* Date Range Selector */}
-              <DateRangeSelector
-                dateRange={dateRange}
-                setDateRange={setDateRange}
-              />
+              {/* Range Mode Toggle */}
+              <div className="mb-4">
+                <label className="block text-xs font-medium text-[#8b949e] mb-2 uppercase tracking-wide">
+                  Commit Range
+                </label>
+                <div className="flex rounded-lg border border-[#30363d] overflow-hidden">
+                  <button
+                    onClick={() => setRangeMode('date')}
+                    className={`flex-1 py-2 text-xs font-medium transition-colors ${
+                      rangeMode === 'date'
+                        ? 'bg-[#238636] text-white'
+                        : 'bg-[#0d1117] text-[#8b949e] hover:text-[#c9d1d9]'
+                    }`}
+                  >
+                    Date Range
+                  </button>
+                  <button
+                    onClick={() => setRangeMode('tag')}
+                    className={`flex-1 py-2 text-xs font-medium transition-colors ${
+                      rangeMode === 'tag'
+                        ? 'bg-[#238636] text-white'
+                        : 'bg-[#0d1117] text-[#8b949e] hover:text-[#c9d1d9]'
+                    }`}
+                  >
+                    Tag Range
+                  </button>
+                </div>
+              </div>
 
-              {/* Tone Selector — Fix #3: subtle left-border style */}
+              {/* Date Range or Tag Selector */}
+              {rangeMode === 'date' ? (
+                <DateRangeSelector
+                  dateRange={dateRange}
+                  setDateRange={setDateRange}
+                />
+              ) : (
+                <div className="mb-5">
+                  <TagSelector
+                    owner={owner}
+                    repo={repo}
+                    fromTag={fromTag}
+                    toTag={toTag}
+                    setFromTag={setFromTag}
+                    setToTag={setToTag}
+                  />
+                </div>
+              )}
+
+              {/* Tone Selector */}
               <div className="mb-5">
                 <label className="block text-xs font-medium text-[#8b949e] mb-3 uppercase tracking-wide">
                   Output Tone
@@ -70,11 +180,8 @@ export default function GeneratorClient({ owner, repo }: GeneratorClientProps) {
                           : 'bg-[#0d1117] border-l-transparent border border-[#30363d] hover:border-[#8b949e]'
                       }`}
                     >
-                      {/* Custom radio dot */}
                       <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 ${
-                        tone === option.value
-                          ? 'border-[#3fb950]'
-                          : 'border-[#8b949e]'
+                        tone === option.value ? 'border-[#3fb950]' : 'border-[#8b949e]'
                       }`}>
                         {tone === option.value && (
                           <div className="w-2 h-2 rounded-full bg-[#3fb950]" />
@@ -85,7 +192,7 @@ export default function GeneratorClient({ owner, repo }: GeneratorClientProps) {
                         name="tone"
                         value={option.value}
                         checked={tone === option.value}
-                        onChange={(e) => setTone(e.target.value as typeof tone)}
+                        onChange={(e) => setTone(e.target.value as Tone)}
                         className="sr-only"
                       />
                       <div>
@@ -99,35 +206,91 @@ export default function GeneratorClient({ owner, repo }: GeneratorClientProps) {
                 </div>
               </div>
 
+              {/* Error message */}
+              {fetchStatus === 'error' && fetchError && (
+                <div className="mb-4 px-3 py-2 bg-[#f85149]/10 border border-[#f85149]/30 rounded-lg">
+                  <p className="text-xs text-[#f85149]">{fetchError}</p>
+                </div>
+              )}
+
               {/* Fetch Button */}
-              <button className="w-full px-4 py-2.5 bg-[#238636] hover:bg-[#2ea043] text-white text-sm font-semibold rounded-lg transition-colors flex items-center justify-center gap-2">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                </svg>
-                Fetch & Generate
+              <button
+                onClick={handleFetch}
+                disabled={!canFetch || fetchStatus === 'loading'}
+                className={`w-full px-4 py-2.5 text-white text-sm font-semibold rounded-lg transition-colors flex items-center justify-center gap-2 ${
+                  !canFetch || fetchStatus === 'loading'
+                    ? 'bg-[#238636]/40 cursor-not-allowed'
+                    : 'bg-[#238636] hover:bg-[#2ea043]'
+                }`}
+              >
+                {fetchStatus === 'loading' ? (
+                  <>
+                    <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                    </svg>
+                    Fetching Commits...
+                  </>
+                ) : (
+                  <>
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                    {fetchStatus === 'success' ? 'Refetch Commits' : 'Fetch Commits'}
+                  </>
+                )}
               </button>
+
+              {/* Success hint */}
+              {fetchStatus === 'success' && commits.length > 0 && (
+                <p className="text-xs text-[#8b949e] text-center mt-2">
+                  {commits.length} commits loaded — now click Generate Changelog
+                </p>
+              )}
             </div>
 
-            {/* Recent Commits Card — Fix #4: cleaner layout */}
-            <div className="bg-[#161b22] border border-[#30363d] rounded-lg p-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <svg className="w-4 h-4 text-[#3fb950]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  <span className="text-sm font-medium text-white">Recent Commits</span>
-                </div>
-                <svg className="w-4 h-4 text-[#8b949e]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            {/* Commits Card */}
+            <div className="bg-[#161b22] border border-[#30363d] rounded-lg overflow-hidden">
+              <div className="flex items-center gap-2 px-4 py-3 border-b border-[#30363d]">
+                <svg className="w-4 h-4 text-[#3fb950]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
+                <span className="text-sm font-medium text-white">
+                  {fetchStatus === 'success' && commits.length > 0
+                    ? `${commits.length} Commits Found`
+                    : 'Recent Commits'}
+                </span>
               </div>
-              <p className="text-xs text-[#8b949e] mt-2">
-                Select a date range to view commits
-              </p>
+
+              {fetchStatus === 'loading' && (
+                <div className="px-4 py-6 flex items-center justify-center gap-2">
+                  <svg className="w-4 h-4 animate-spin text-[#8b949e]" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                  </svg>
+                  <span className="text-sm text-[#8b949e]">Fetching commits...</span>
+                </div>
+              )}
+
+              {fetchStatus === 'idle' && (
+                <p className="text-xs text-[#8b949e] px-4 py-3">
+                  Select a range and click Fetch Commits
+                </p>
+              )}
+
+              {fetchStatus === 'error' && (
+                <p className="text-xs text-[#f85149] px-4 py-3">
+                  Failed to load commits. Try again.
+                </p>
+              )}
+
+              {fetchStatus === 'success' && (
+                <CommitList commits={commits} wasTruncated={wasTruncated} />
+              )}
             </div>
           </div>
 
-          {/* Right Column - Preview — Fix #5: cleaner empty state */}
+          {/* Right Column - Preview */}
           <div className="lg:col-span-2">
             <div className="bg-[#161b22] border border-[#30363d] rounded-lg min-h-150 flex flex-col">
 
@@ -139,7 +302,6 @@ export default function GeneratorClient({ owner, repo }: GeneratorClientProps) {
                   </svg>
                   <span className="text-sm font-medium text-white">Generated Changelog</span>
                 </div>
-                {/* Export buttons — disabled for now */}
                 <div className="flex items-center gap-2">
                   <button disabled className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-[#8b949e] border border-[#30363d] rounded-md opacity-40 cursor-not-allowed">
                     <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -168,7 +330,9 @@ export default function GeneratorClient({ owner, repo }: GeneratorClientProps) {
                     No Changelog Generated Yet
                   </h3>
                   <p className="text-sm text-[#8b949e] max-w-xs mx-auto">
-                    Select a date range and click &quot;Fetch & Generate&quot; to create your changelog
+                    {fetchStatus === 'success' && commits.length > 0
+                      ? 'Commits loaded! Click "Generate Changelog" to continue'
+                      : 'Fetch commits first, then generate your changelog'}
                   </p>
                 </div>
               </div>
@@ -181,3 +345,25 @@ export default function GeneratorClient({ owner, repo }: GeneratorClientProps) {
     </div>
   )
 }
+// ```
+
+// ---
+
+// **What's now wired up:**
+// ```
+// User selects date range or tags
+//         ↓
+// canFetch becomes true → button enables
+//         ↓
+// User clicks "Fetch Commits"
+//         ↓
+// handleFetch() runs
+//   → POST /api/repos/{owner}/{repo}/commits
+//   → fetchStatus = 'loading' → spinner shows
+//         ↓
+// Response comes back
+//   → success → commits populate the list below config
+//   → error   → red error message shows above button
+//         ↓
+// Right panel hint updates:
+//   "Commits loaded! Click Generate Changelog to continue"

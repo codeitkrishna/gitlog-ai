@@ -58,7 +58,7 @@ export default function RepoCard({ repo }: RepoCardProps) {
       </div>
 
       {/* Description */}
-      <p className="text-[#8b949e] text-sm mb-4 line-clamp-2 min-h-[2.5rem]">
+      <p className="text-[#8b949e] text-sm mb-4 line-clamp-2 min-h-10">
         {repo.description || "No description provided"}
       </p>
 

@@ -18,7 +18,7 @@ GitLog AI connects to your GitHub repositories, fetches commits across a date ra
 ## Tech Stack
 
 | Layer | Technology |
-| --- | --- |
+| ----- | ---------- |
 | Framework | Next.js 14 (App Router) |
 | Language | TypeScript |
 | Styling | Tailwind CSS |
