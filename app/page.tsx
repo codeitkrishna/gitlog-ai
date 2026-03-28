@@ -1,13 +1,15 @@
-// import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/supabase/server";
 import Hero from "@/components/Hero";
 
 export default async function Home() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
 
   return (
-    <main>
+    <main className="bg-[#0D1117]">
 
       {/* HERO SECTION */}
-      <Hero/>
+      <Hero user={!!user} />
 
       {/* HOW IT WORKS */}
       <section className="py-20 px-6 max-w-6xl mx-auto">
@@ -40,27 +42,6 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* EXAMPLE OUTPUT */}
-      <section className="py-20 px-6 bg-gray-50 dark:bg-gray-800">
-        <div className="max-w-3xl mx-auto">
-          <h2 className="text-3xl font-bold text-center mb-10">
-            Example Output
-          </h2>
-
-          <div className="bg-white dark:bg-gray-900 border dark:border-gray-700 rounded-lg p-6 font-mono text-sm">
-            <pre>
-              {`## 🚀 Features
-                - User Authentication: Added secure login
-                - Dashboard: New project overview page
-
-                ## 🐛 Bug Fixes
-                - Fixed mobile responsive issues
-                - Resolved email notification bug
-              `}
-            </pre>
-          </div>
-        </div>
-      </section>
     </main>
   );
 }

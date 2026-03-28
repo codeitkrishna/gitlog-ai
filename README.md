@@ -126,6 +126,7 @@ npm install
 Run this SQL in your Supabase SQL editor to create the required table:
 
 ```sql
+-- Table to store GitHub tokens
 CREATE TABLE user_tokens (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id uuid REFERENCES auth.users NOT NULL,
@@ -135,11 +136,37 @@ CREATE TABLE user_tokens (
   UNIQUE(user_id, provider)
 );
 
-ALTER TABLE user_tokens ENABLE ROW LEVEL SECURITY;
+-- Table to store generated changelogs
+CREATE TABLE changelogs (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id uuid REFERENCES auth.users NOT NULL,
+  repo_name text NOT NULL,
+  repo_owner text NOT NULL,
+  version_from text,
+  version_to text,
+  tone text,
+  content jsonb,
+  markdown text,
+  created_at timestamp DEFAULT now()
+);
 
+-- Enable RLS
+ALTER TABLE user_tokens ENABLE ROW LEVEL SECURITY;
+ALTER TABLE changelogs ENABLE ROW LEVEL SECURITY;
+
+-- user_tokens policies
 CREATE POLICY "Users can manage own tokens"
 ON user_tokens FOR ALL
 USING (auth.uid() = user_id);
+
+-- changelogs policies
+CREATE POLICY "Users can view own changelogs"
+ON changelogs FOR SELECT
+USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can create own changelogs"
+ON changelogs FOR INSERT
+WITH CHECK (auth.uid() = user_id);
 ```
 
 ### 4. Configure environment variables
@@ -150,6 +177,8 @@ Create a `.env.local` file at the root:
 NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+
+SUPABASE_SERVICE_ROLE_KEY= # Used for secure server-side operations (never expose)
 
 ANTHROPIC_API_KEY=sk-ant-your-key
 
