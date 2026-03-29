@@ -758,7 +758,7 @@ export default function GeneratorClient({ owner, repo }: GeneratorClientProps) {
                       Analyzing your commits
                     </h3>
                     <p className="text-sm text-[#7fc28e] max-w-xs mx-auto">
-                      Claude is grouping changes and rewriting them into a clean changelog.
+                      AI is grouping changes and rewriting them into a clean changelog.
                     </p>
                   </div>
                 </div>
