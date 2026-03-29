@@ -7,6 +7,11 @@ export const metadata = {
   description: "AI powered changelog generator",
 }
 
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+}
+
 export default function RootLayout({
   children,
 }: {
@@ -14,17 +19,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-
-      <body className="">
-
+      <body className="overflow-x-hidden">
         <Navbar />
-
         {children}
-
         <Footer />
-
       </body>
-
     </html>
   )
 }

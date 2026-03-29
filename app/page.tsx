@@ -6,7 +6,7 @@ export default async function Home() {
   const { data: { user } } = await supabase.auth.getUser()
 
   return (
-    <main className="bg-[#0D1117]">
+    <main className="bg-[#0D1317]">
 
       {/* HERO SECTION */}
       <Hero user={!!user} />

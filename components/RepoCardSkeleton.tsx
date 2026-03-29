@@ -1,6 +1,6 @@
 export default function RepoCardSkeleton() {
   return (
-    <div className="bg-[#161b22] border border-[#30363d] rounded-lg p-6 animate-pulse">
+    <div className="bg-[#121F23] border border-[#30363d] rounded-lg p-6 animate-pulse opacity-25">
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center gap-3 flex-1">
           <div className="w-5 h-5 bg-[#30363d] rounded" />

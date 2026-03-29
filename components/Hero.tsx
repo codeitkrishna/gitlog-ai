@@ -4,7 +4,7 @@ import Image from "next/image";
 export default function Hero({ user }: { user?: boolean }) {
   return (
     <section className="relative ">
-      <section className=" w-screen bg-[url('/images/heroBg.svg')] bg-cover bg-no-repeat z-10 border-b  border-[#22c55e]">
+      <section className=" w-full bg-[url('/images/heroBg.svg')] bg-cover bg-no-repeat z-10 border-b  border-[#22c55e]">
         {/* Top green radial glow */}
         <div
           className="absolute top-0 left-1/2 -translate-x-1/2 w-200 h-100 z-0 pointer-events-none"
@@ -79,7 +79,7 @@ export default function Hero({ user }: { user?: boolean }) {
           </p> */}
         </div>
 
-        <div className="relative flex flex-col items-center justify-end">
+        <div className="relative flex flex-col items-center justify-end opacity-85">
           <Image
             src="/images/changelogsHeroComponent.svg"
             alt="Picture of the author"
