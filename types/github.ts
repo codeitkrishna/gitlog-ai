@@ -50,3 +50,15 @@ export interface CommitData {
   additions: number
   deletions: number
 }
+
+export interface CommitStats {
+  total: number
+  contributors: number
+  contributorNames: string[]
+  totalFilesChanged: number
+  totalAdditions: number
+  totalDeletions: number
+  earliestDate: string | null
+  latestDate: string | null
+  filteredOut: number
+}
