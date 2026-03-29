@@ -86,22 +86,21 @@ export default function DashboardClient() {
 
   return (
     <div className="min-h-screen bg-[#0d1317] text-[#caffd6] bg-[url('/images/heroBg.svg')] bg-no-repeat bg-cover">
-      <div className="max-w-7xl mt-12 mx-auto px-6 sm:px-8 lg:px-12 py-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 pt-24 sm:pt-28 pb-10 sm:pb-12">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-[#22c55e] mb-2">
+          <h1 className="text-2xl sm:text-3xl font-bold text-[#22c55e] mb-2">
             Your Repositories
           </h1>
-          <p className="text-[#CAFFD6]">
+          <p className="text-sm sm:text-base text-[#CAFFD6] max-w-2xl">
             Manage and monitor your connected git projects with AI insights.
           </p>
         </div>
 
         {/* Search and Sort Bar */}
-
-          <div className="flex gap-4 items-center mb-8">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 items-stretch sm:items-center mb-8">
             {/* Search Box */}
-            <div className="relative flex-1 ">
+            <div className="relative flex-1 min-w-0">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <svg
                   className="h-5 w-5 text-[#caffd6]"
@@ -122,18 +121,16 @@ export default function DashboardClient() {
                 placeholder="Search repositories by name, language or keyword..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                /* Added h-12 to force identical height */
-                className="w-5xl h-12 pl-10 pr-4 bg-[#121f23] rounded-lg text-[#caffd6] placeholder-[#7fc28e] border border-transparent focus:outline-none focus:border-[#7fc28e] transition-all"
+                className="w-full h-12 pl-10 pr-4 bg-[#121f23] rounded-lg text-sm sm:text-base text-[#caffd6] placeholder-[#7fc28e] border border-transparent focus:outline-none focus:border-[#7fc28e] transition-all"
               />
             </div>
 
             {/* Sort Dropdown */}
-            <div className="w-48 flex justify-evenly ">
+            <div className="w-full sm:w-48 flex justify-evenly">
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as SortOption)}
-                
-                className="w-full h-12 px-3 bg-[#121f23] rounded-lg text-[#7fc28e] border border-transparent focus:outline-none focus:border-[#7fc28e] transition-all cursor-pointer appearance-none"
+                className="w-full h-12 px-3 bg-[#121f23] rounded-lg text-sm sm:text-base text-[#7fc28e] border border-transparent focus:outline-none focus:border-[#7fc28e] transition-all cursor-pointer appearance-none"
               >
                 <option value="updated">Recently Updated</option>
                 <option value="name">Name (A-Z)</option>
@@ -223,8 +220,8 @@ export default function DashboardClient() {
         {!loading && !error && filteredRepos.length > 0 && (
           <>
             {/* Results Count */}
-            <div className="mb-4 flex items-center justify-between text-sm text-[#e6f8ea]">
-              <span>
+            <div className="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-sm text-[#e6f8ea]">
+              <span className="break-words">
                 Showing {visibleRepos.length} of {filteredRepos.length}{" "}
                 repositories
                 {searchQuery && ` matching "${searchQuery}"`}
@@ -251,7 +248,7 @@ export default function DashboardClient() {
               <div className="mt-8 text-center">
                 <button
                   onClick={loadMore}
-                  className="w-100 px-2 py-3 bg-[#121f23] rounded-lg font-semibold text-lg text-[#7fc28e] transition-colors cursor-pointer"
+                  className="w-full sm:w-auto sm:min-w-[320px] px-4 py-3 bg-[#121f23] rounded-lg font-semibold text-base sm:text-lg text-[#7fc28e] transition-colors cursor-pointer"
                 >
                   Load More ({filteredRepos.length - displayCount} remaining)
                 </button>

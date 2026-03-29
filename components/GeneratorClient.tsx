@@ -145,8 +145,8 @@ export default function GeneratorClient({ owner, repo }: GeneratorClientProps) {
   return (
     <div className="min-h-screen bg-[#0d1317] bg-[url('/images/heroBg.svg')] bg-cover bg-no-repeat text-[#CAFFD6]">
       {/* Page Header */}
-      <div className="max-w-7xl mx-auto px-6 lg:px-8 pt-24 pb-6">
-        <div className="flex items-center gap-3">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 sm:pt-24 pb-6">
+        <div className="flex items-start sm:items-center gap-3">
           <div className="w-8 h-8 rounded-md bg-[#238636] flex items-center justify-center shrink-0">
             <svg
               className="w-4 h-4 text-white"
@@ -168,7 +168,7 @@ export default function GeneratorClient({ owner, repo }: GeneratorClientProps) {
       </div>
 
       {/* Main Grid */}
-      <div className="max-w-7xl mx-auto px-6 lg:px-8 pb-16">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* ── Left Column ── */}
           <div className="lg:col-span-1 space-y-4">
@@ -599,7 +599,7 @@ export default function GeneratorClient({ owner, repo }: GeneratorClientProps) {
           <div className="lg:col-span-2">
             <div className="bg-[#121f23] rounded-xl overflow-hidden min-h-[600px] flex flex-col">
               {/* Panel Header */}
-              <div className="flex items-center justify-between px-6 py-4 border-b border-[#1e3a2a]">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 px-4 sm:px-6 py-4 border-b border-[#1e3a2a]">
                 <div className="flex items-center gap-2">
                   <svg
                     className="w-4 h-4 text-[#22c55e]"
@@ -618,7 +618,7 @@ export default function GeneratorClient({ owner, repo }: GeneratorClientProps) {
                     Generated Changelog
                   </span>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                   <button
                     onClick={handleGenerate}
                     disabled={!canGenerate || generateStatus === "loading"}
@@ -788,7 +788,7 @@ export default function GeneratorClient({ owner, repo }: GeneratorClientProps) {
                 </div>
               ) : changelog ? (
                 <>
-                  <div className="px-6 py-3 border-b border-[#1e3a2a] bg-[#0d1317]/40">
+                  <div className="px-4 sm:px-6 py-3 border-b border-[#1e3a2a] bg-[#0d1317]/40">
                     <div className="flex flex-wrap items-center gap-2 text-xs text-[#7fc28e]">
                       <span className="text-[#22c55e] font-medium">{owner}/{repo}</span>
                       <span>•</span>
