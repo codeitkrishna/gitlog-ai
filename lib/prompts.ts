@@ -27,8 +27,9 @@ export function buildChangelogPrompt(
   repoName: string,
   currentDate: Date = new Date()
 ): string {
-  // Format commits into a readable list for the AI
-  const commitList = commits
+  const MAX_COMMITS_FOR_AI = 100
+  const commitsToAnalyse = commits.slice(0, MAX_COMMITS_FOR_AI)
+  const commitList = commitsToAnalyse  // ← changed
     .map(
       (c, i) =>
         `${i + 1}. [${c.shortSha}] ${c.message.split("\n")[0]}
@@ -43,7 +44,7 @@ Your goal is to write changelog entries that feel natural, useful, and written b
 
 CONTEXT:
 - Repository: ${repoName}
-- Total commits: ${commits.length}
+- Total commits: ${commitsToAnalyse.length} 
 - Output tone: ${tone}
 - Today's date: ${formatLocalDate(currentDate)}
 

@@ -1,3 +1,4 @@
+//app/api/generate/route.ts
 import { NextResponse } from 'next/server'
 import { generateWithAI } from '@/lib/ai'
 import { parseChangelogResponse } from '@/lib/ai-parser'
@@ -19,6 +20,24 @@ export async function POST(request: Request) {
 
     if (userError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+    const { count, error: countError } = await supabase
+      .from("changelog_generations")
+      .select("*", { count: "exact", head: true })
+      .eq("user_id", user.id)
+      .gte("created_at", oneHourAgo);
+
+    if (!countError && count !== null && count >= 10) {
+      return NextResponse.json(
+        {
+          error: "Rate limit reached",
+          message:
+            "You can generate up to 10 changelogs per hour. Please wait before trying again.",
+        },
+        { status: 429 },
+      );
     }
 
     const body = (await request.json()) as Partial<GenerateChangelogRequestBody>
@@ -66,10 +85,18 @@ export async function POST(request: Request) {
       )
     }
 
-    const commits = normalizeCommits(body.commits)
-    const prompt = buildChangelogPrompt(commits, tone, repoName)
-    const rawResponse = await generateWithAI(prompt)
-    const changelog = parseChangelogResponse(rawResponse)
+    const commits = normalizeCommits(body.commits);
+    const prompt = buildChangelogPrompt(commits, tone, repoName);
+    const rawResponse = await generateWithAI(prompt);
+    const changelog = parseChangelogResponse(rawResponse);
+
+    await supabase.from("changelog_generations").insert({
+      user_id: user.id,
+      repo_name: repoName,
+      commit_count: commits.length,
+      tone,
+    });
+
 
     return NextResponse.json({
       changelog,
