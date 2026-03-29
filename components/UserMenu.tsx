@@ -26,7 +26,7 @@ export default function UserMenu({ user }: { user: User }) {
     <div className="relative">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+        className="flex items-center gap-2 px-2 sm:px-3 py-2 rounded-lg hover:bg-[#121f23] transition-colors text-[#CAFFD6] max-w-[calc(100vw-7rem)]"
       >
         {avatarUrl ? (
           <Image
@@ -61,19 +61,19 @@ export default function UserMenu({ user }: { user: User }) {
             onClick={() => setIsOpen(false)}
           />
           
-          <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-2 z-20">
-            <div className="px-4 py-2 border-b border-gray-200 dark:border-gray-700">
-              <p className="text-sm font-medium text-gray-900 dark:text-white">
+          <div className="absolute right-0 mt-2 w-64 max-w-[calc(100vw-2rem)] bg-[#121f23] rounded-lg shadow-lg border border-[#1e3a2a] py-2 z-20">
+            <div className="px-4 py-2 border-b border-[#1e3a2a]">
+              <p className="text-sm font-medium text-[#CAFFD6]">
                 {user.user_metadata?.user_name || 'User'}
               </p>
-              <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+              <p className="text-xs text-[#7fc28e] truncate">
                 {user.email}
               </p>
             </div>
 
             <Link
               href="/dashboard"
-              className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+              className="block px-4 py-2 text-sm text-[#CAFFD6] hover:bg-[#0d1317] transition-colors"
               onClick={() => setIsOpen(false)}
             >
               <div className="flex items-center gap-2">
@@ -86,7 +86,7 @@ export default function UserMenu({ user }: { user: User }) {
 
             <Link
               href="/generator"
-              className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+              className="block px-4 py-2 text-sm text-[#CAFFD6] hover:bg-[#0d1317] transition-colors"
               onClick={() => setIsOpen(false)}
             >
               <div className="flex items-center gap-2">
@@ -99,7 +99,7 @@ export default function UserMenu({ user }: { user: User }) {
 
             <Link
               href="/history"
-              className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+              className="block px-4 py-2 text-sm text-[#CAFFD6] hover:bg-[#0d1317] transition-colors"
               onClick={() => setIsOpen(false)}
             >
               <div className="flex items-center gap-2">
@@ -110,10 +110,10 @@ export default function UserMenu({ user }: { user: User }) {
               </div>
             </Link>
 
-            <div className="border-t border-gray-200 dark:border-gray-700 mt-2 pt-2">
+            <div className="border-t border-[#1e3a2a] mt-2 pt-2">
               <button
                 onClick={handleLogout}
-                className="w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                className="w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-red-500/10 transition-colors"
               >
                 <div className="flex items-center gap-2">
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -82,7 +82,7 @@ export default function DateRangeSelector({ dateRange, setDateRange }: DateRange
 
       {/* Custom Calendar */}
       {showCalendar && (
-        <div className="p-4 bg-[#0d1117] border border-[#30363d] rounded-lg">
+        <div className="p-3 sm:p-4 bg-[#0d1117] border border-[#30363d] rounded-lg overflow-x-auto">
           <DayPicker
             mode="range"
             selected={{ from: dateRange.from || undefined, to: dateRange.to || undefined }}

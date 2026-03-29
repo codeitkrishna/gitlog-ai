@@ -30,28 +30,28 @@ export default function LoginPage() {
 
   return (
     <div
-      className="min-h-screen flex items-center justify-center bg-[#0d1317] bg-[url('/images/heroBg.svg')] bg-cover bg-no-repeat"
+      className="min-h-screen flex items-center justify-center bg-[#0d1317] bg-[url('/images/heroBg.svg')] bg-cover bg-no-repeat px-4 pt-24 pb-8 sm:px-6"
     >
       {/* Top green radial glow */}
       <div
-        className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] pointer-events-none"
+        className="absolute top-0 left-1/2 -translate-x-1/2 w-[360px] h-[180px] sm:w-[600px] sm:h-[300px] pointer-events-none"
         style={{
           background:
             'radial-gradient(ellipse at center top, rgba(35,134,54,0.15) 0%, transparent 70%)',
         }}
       />
 
-      <div className="relative z-10 w-full max-w-md mx-4 flex flex-col items-center">
+      <div className="relative z-10 w-full max-w-md flex flex-col items-center">
 
         {/* Card */}
-        <div className="w-full bg-[#121f23] rounded-2xl p-12 flex flex-col items-center gap-8">
+        <div className="w-full bg-[#121f23] rounded-2xl p-6 sm:p-10 lg:p-12 flex flex-col items-center gap-6 sm:gap-8">
 
           {/* Title */}
           <div className="text-center">
-            <h1 className="text-3xl font-bold text-[#CAFFD6] mb-2">
+            <h1 className="text-2xl sm:text-3xl font-bold text-[#CAFFD6] mb-2">
               Welcome back
             </h1>
-            <p className="text-base text-[#7fc28e] text-center">
+            <p className="text-sm sm:text-base text-[#7fc28e] text-center">
               Generate beautiful changelogs in seconds
             </p>
           </div>
@@ -63,7 +63,7 @@ export default function LoginPage() {
           <button
             onClick={handleGitHubLogin}
             disabled={isLoading}
-            className="w-full flex items-center justify-center gap-3 bg-[#238636] hover:bg-[#2ea043] disabled:opacity-50 disabled:cursor-not-allowed text-[#CAFFD6] font-semibold px-6 py-4 rounded-lg transition-colors text-base"
+            className="w-full flex items-center justify-center gap-3 bg-[#238636] hover:bg-[#2ea043] disabled:opacity-50 disabled:cursor-not-allowed text-[#CAFFD6] font-semibold px-5 sm:px-6 py-3.5 sm:py-4 rounded-lg transition-colors text-sm sm:text-base"
           >
             {isLoading ? (
               <>
@@ -84,7 +84,7 @@ export default function LoginPage() {
           </button>
 
           {/* Terms */}
-          <p className="mt-6 text-sm text-[#7fc28e] text-center">
+          <p className="mt-2 sm:mt-4 text-xs sm:text-sm text-[#7fc28e] text-center leading-6">
             By signing in, you agree to our{' '}
             <span className="text-[#22c55e] cursor-pointer hover:underline">Terms of Service</span>
             {' '}and{' '}
@@ -93,7 +93,7 @@ export default function LoginPage() {
         </div>
 
         {/* Footer */}
-        <p className="mt-6 text-xs text-[#7fc28e] text-center">
+        <p className="mt-5 text-xs text-[#7fc28e] text-center px-4">
           AI-powered changelog generation from your Git history
         </p>
       </div>

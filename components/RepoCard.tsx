@@ -34,36 +34,36 @@ export default function RepoCard({ repo }: RepoCardProps) {
   return (
     <div
       onClick={handleClick}
-      className="bg-[#121F23] border border-[#30363d] rounded-lg p-6 hover:border-[#22c55e] hover:shadow-lg transition-all cursor-pointer group opacity-85"
+      className="bg-[#121F23] border border-[#30363d] rounded-xl p-4 sm:p-5 hover:border-[#22c55e] hover:shadow-lg transition-all cursor-pointer group opacity-85 h-full"
     >
       {/* Header */}
-      <div className="flex items-start justify-between mb-3">
-        <div className="flex items-center gap-3">
+      <div className="flex items-start justify-between gap-3 mb-3">
+        <div className="flex items-center gap-3 min-w-0">
           <svg
-            className="w-5 h-5 text-[#CAFFD6]"
+            className="w-5 h-5 text-[#CAFFD6] shrink-0"
             fill="currentColor"
             viewBox="0 0 24 24"
           >
             <path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
           </svg>
-          <h3 className="text-[#22c55e] font-semibold group-hover:underline truncate">
+          <h3 className="text-[#22c55e] font-semibold group-hover:underline truncate min-w-0">
             {repo.name}
           </h3>
         </div>
         {repo.isPrivate && (
-          <span className="px-2 py-1 text-xs bg-[#194f45] text-[#CAFFD6] rounded border border-[#30363d]">
+          <span className="px-2 py-1 text-[10px] sm:text-xs bg-[#194f45] text-[#CAFFD6] rounded border border-[#30363d] shrink-0">
             PRIVATE
           </span>
         )}
       </div>
 
       {/* Description */}
-      <p className="text-[#CAFFD6] text-sm mb-4 line-clamp-2 min-h-10">
+      <p className="text-[#CAFFD6] text-sm mb-4 line-clamp-3 min-h-[3.75rem]">
         {repo.description || "No description provided"}
       </p>
 
       {/* Metadata */}
-      <div className="flex items-center gap-4 text-xs text-[#CAFFD6]">
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-[#CAFFD6]">
         {repo.language && (
           <div className="flex items-center gap-1.5">
             <span
@@ -83,9 +83,9 @@ export default function RepoCard({ repo }: RepoCardProps) {
           </div>
         )}
 
-        <div className="ml-auto text-[#caffd6]">
+        <div className="text-[#caffd6] sm:ml-auto">
           {repo.updatedAt && (
-            <div className="ml-auto">
+            <div>
               Updated{" "}
               {formatDistanceToNow(new Date(repo.updatedAt), {
                 addSuffix: true,

@@ -49,3 +49,9 @@ html {
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
 }
+
+@media (max-width: 640px) {
+  .rdp-custom {
+    --rdp-cell-size: 36px;
+  }
+}
