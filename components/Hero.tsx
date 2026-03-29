@@ -15,28 +15,28 @@ export default function Hero({ user }: { user?: boolean }) {
         />
 
         {/* Hero content */}
-        <div className="relative z-10 flex flex-col items-center justify-center text-center px-4 sm:px-6 pt-24 sm:pt-28 lg:pt-32 pb-8 sm:pb-10">
+        <div className="relative z-10 flex flex-col items-center justify-center text-center px-4 sm:px-6 pt-20 sm:pt-24 lg:pt-28 pb-8 sm:pb-10">
           {/* Badge */}
-          <div className="inline-flex flex-wrap items-center justify-center gap-2 bg-[#238636]/10 border border-[#238636]/30 text-green-400 px-3 sm:px-4 py-1.5 rounded-full text-[10px] sm:text-xs font-semibold tracking-[0.22em] uppercase mb-6 sm:mb-8 max-w-full">
+          <div className="inline-flex flex-wrap items-center justify-center gap-2 bg-[#238636]/10 border border-[#238636]/30 text-green-400 px-3 sm:px-4 py-1.5 rounded-full text-[10px] sm:text-xs font-semibold tracking-[0.22em] uppercase mb-4 sm:mb-6 max-w-full">
             <Image src="/images/star.svg" alt="star" height={18} width={18} />
             AI-Powered Assistant
           </div>
 
           {/* Headline */}
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-tight tracking-tight max-w-4xl">
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-tight tracking-tight max-w-6xl">
             <span className="text-[#15E160]">
               Generate Changelogs in Seconds
             </span>
           </h1>
 
           {/* Subheadline */}
-          <p className="mt-5 sm:mt-6 text-[#CAFFD6] text-base sm:text-lg max-w-xl leading-relaxed px-2">
+          <p className="mt-5 sm:mt-6 text-[#CAFFD6] text-base sm:text-lg max-w-2xl leading-relaxed px-2">
             Automate your release notes directly from your GitHub commits. Built
             for developers who value speed and clarity.
           </p>
 
           {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 mt-8 sm:mt-10 w-full max-w-sm sm:max-w-none sm:w-auto">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 mt-6 sm:mt-8 w-full max-w-sm sm:max-w-none sm:w-auto">
             {user ? (
               <Link
                 href="/dashboard"
