@@ -803,7 +803,10 @@ export default function GeneratorClient({ owner, repo }: GeneratorClientProps) {
                       )}
                     </div>
                   </div>
-                  <ChangelogPreview changelog={changelog} />
+                  <ChangelogPreview
+                    key={generatedAt ?? `${owner}/${repo}-${tone}-${commits.length}`}
+                    changelog={changelog}
+                  />
                 </>
               ) : (
                 <div className="flex-1 flex items-center justify-center p-8">
@@ -841,10 +844,8 @@ export default function GeneratorClient({ owner, repo }: GeneratorClientProps) {
     </div>
   );
 }
-// ```
 
-// **How it works:**
-// ```
+// How it works:
 // Page loads
 //   → configCollapsed = false → full config visible, chevron points up
 
