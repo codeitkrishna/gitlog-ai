@@ -64,30 +64,52 @@ Middleware runs before every page load, silently refreshes the session if expire
 
 ## Project Structure
 
-```
+```  
 gitlog-ai/
 ├── app/
-│   ├── (auth)/login/          # Login page
+│   ├── (auth)/login/                # Login page
 │   ├── api/
-│   │   ├── repos/             # Fetch user's GitHub repos
-│   │   ├── commits/           # Fetch commits for a repo
-│   │   └── generate/          # Send commits to Claude AI
-│   ├── auth/callback/         # OAuth callback handler
-│   ├── dashboard/             # Repository browser
-│   └── generate/[owner]/[repo]/ # Changelog generator
+│   │   ├── generate/route.ts        # Generate AI changelog output
+│   │   └── repos/
+│   │       ├── route.ts             # Fetch authenticated user's repos
+│   │       └── [owner]/[repo]/
+│   │           ├── commits/route.ts # Fetch commits for a selected range
+│   │           └── tags/route.ts    # Fetch repo tags for tag-to-tag generation
+│   ├── auth/callback/route.ts       # OAuth callback handler
+│   ├── dashboard/page.tsx           # Repository browser page
+│   ├── generate/[owner]/[repo]/     # Changelog generator route
+│   ├── globals.css                  # Global styles
+│   ├── layout.tsx                   # Root layout
+│   └── page.tsx                     # Landing page
 ├── components/
-│   ├── GeneratorClient.tsx    # Main generator UI
-│   ├── DateRangeSelector.tsx  # Date/tag range picker
-│   ├── DashboardClient.tsx    # Repo grid with search/sort
-│   ├── RepoCard.tsx           # Individual repo card
-│   └── Navbar.tsx / UserMenu.tsx
+│   ├── ChangelogPreview.tsx         # Generated changelog preview/editor
+│   ├── CommitList.tsx               # Commit list with metadata
+│   ├── DashboardClient.tsx          # Repo grid with search/sort/filter
+│   ├── DateRangeSelector.tsx        # Date range picker
+│   ├── Footer.tsx                   # Landing page footer
+│   ├── GeneratorClient.tsx          # Main changelog generator UI
+│   ├── Hero.tsx                     # Landing page hero section
+│   ├── Navbar.tsx                   # Top navigation
+│   ├── RepoCard.tsx                 # Individual repository card
+│   ├── RepoCardSkeleton.tsx         # Loading state for repo cards
+│   ├── TagSelector.tsx              # Tag range picker
+│   ├── UserMenu.tsx                 # Authenticated user dropdown
+│   └── ui/
+│       └── Button.tsx               # Reusable button component
 ├── lib/
-│   ├── github.ts              # Octokit wrapper
-│   ├── supabase/
-│   │   ├── client.ts          # Browser Supabase client
-│   │   └── server.ts          # Server Supabase client
-└── types/
-    └── github.ts              # TypeScript interfaces
+│   ├── ai-parser.ts                 # Parse and validate AI JSON responses
+│   ├── ai.ts                        # AI provider client, retries, timeouts
+│   ├── github.ts                    # Octokit wrapper and GitHub helpers
+│   ├── hooks/
+│   │   └── useUser.ts               # Client hook for current user state
+│   ├── prompts.ts                   # Prompt builder for changelog generation
+│   └── supabase/
+│       ├── client.ts                # Browser Supabase client
+│       └── server.ts                # Server Supabase client
+├── types/
+│   ├── changelog.ts                 # Changelog request/response types
+│   └── github.ts                    # GitHub API and commit types
+└── middleware.ts              # Session protection and auth redirects
 ```
 
 ---
@@ -150,9 +172,20 @@ CREATE TABLE changelogs (
   created_at timestamp DEFAULT now()
 );
 
+-- Table to track generation requests for rate limiting
+CREATE TABLE changelog_generations (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id uuid REFERENCES auth.users NOT NULL,
+  repo_name text NOT NULL,
+  commit_count integer NOT NULL,
+  tone text NOT NULL,
+  created_at timestamp DEFAULT now()
+);
+
 -- Enable RLS
 ALTER TABLE user_tokens ENABLE ROW LEVEL SECURITY;
 ALTER TABLE changelogs ENABLE ROW LEVEL SECURITY;
+ALTER TABLE changelog_generations ENABLE ROW LEVEL SECURITY;
 
 -- user_tokens policies
 CREATE POLICY "Users can manage own tokens"
@@ -166,6 +199,15 @@ USING (auth.uid() = user_id);
 
 CREATE POLICY "Users can create own changelogs"
 ON changelogs FOR INSERT
+WITH CHECK (auth.uid() = user_id);
+
+-- changelog_generations policies
+CREATE POLICY "Users can view own generations"
+ON changelog_generations FOR SELECT
+USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can insert own generations"
+ON changelog_generations FOR INSERT
 WITH CHECK (auth.uid() = user_id);
 ```
 
