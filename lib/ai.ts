@@ -13,6 +13,8 @@ const DEFAULT_GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-3.1-flash-lite-
 const DEFAULT_ANTHROPIC_MODEL =
   process.env.ANTHROPIC_MODEL || 'claude-sonnet-4-5-20250929'
 
+const RETRY_DELAYS_MS = [1000, 2000, 4000] // exponential backoff: 1s, 2s, 4s
+
 let geminiClient: GoogleGenerativeAI | null = null
 let anthropicClient: Anthropic | null = null
 
@@ -24,27 +26,86 @@ export async function generateWithAI(prompt: string): Promise<string> {
     const provider = providerOrder[index]
 
     try {
-      return await generateWithProvider(provider, prompt)
+      // Task 6.10: retry each provider up to 3 times with exponential backoff
+      return await withRetry(() => generateWithProvider(provider, prompt), provider)
     } catch (error) {
-      console.error(`${provider} generation error:`, error)
-
+      console.error(`${provider} generation error (all retries exhausted):`, error)
       lastError = normalizeProviderError(error, provider)
       const hasFallbackProvider = index < providerOrder.length - 1
 
       if (!hasFallbackProvider || !shouldTryFallback(error)) {
         throw lastError
       }
+
+      console.log(`Falling back from ${provider} to ${providerOrder[index + 1]}...`)
     }
   }
 
   throw lastError ?? new Error('AI generation failed due to an unknown error')
 }
 
-async function generateWithProvider(provider: AIProvider, prompt: string): Promise<string> {
-  if (provider === 'gemini') {
-    return generateWithGemini(prompt)
+async function withRetry(
+  fn: () => Promise<string>,
+  provider: AIProvider
+): Promise<string> {
+  let lastError: unknown
+
+  for (let attempt = 0; attempt <= RETRY_DELAYS_MS.length; attempt++) {
+    try {
+      return await fn()
+    } catch (error) {
+      lastError = error
+
+      const isLastAttempt = attempt === RETRY_DELAYS_MS.length
+      if (isLastAttempt || !isRetryableError(error)) {
+        throw error
+      }
+
+      const delayMs = RETRY_DELAYS_MS[attempt]
+      console.log(
+        `${provider} attempt ${attempt + 1} failed. Retrying in ${delayMs}ms...`,
+        error instanceof Error ? error.message : error
+      )
+
+      await sleep(delayMs)
+    }
   }
 
+  throw lastError
+}
+
+// Only retry on transient errors — not on auth failures or invalid input
+function isRetryableError(error: unknown): boolean {
+  if (error instanceof GoogleGenerativeAIFetchError) {
+    // Retry on server errors and rate limits, not on auth errors
+    if (error.status === 401 || error.status === 403) return false
+    if (error.status === 400) return false
+    return true
+  }
+
+  if (error instanceof AnthropicAPIError) {
+    if (error.status === 401 || error.status === 403) return false
+    if (error.status === 400) return false
+    return true
+  }
+
+  // Retry on network errors (no status code)
+  if (error instanceof Error) {
+    const msg = error.message.toLowerCase()
+    if (msg.includes('fetch failed') || msg.includes('network') || msg.includes('timeout')) {
+      return true
+    }
+  }
+
+  return false
+}
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms))
+}
+
+async function generateWithProvider(provider: AIProvider, prompt: string): Promise<string> {
+  if (provider === 'gemini') return generateWithGemini(prompt)
   return generateWithAnthropic(prompt)
 }
 
@@ -53,10 +114,7 @@ async function generateWithGemini(prompt: string): Promise<string> {
   const result = await model.generateContent(prompt)
   const text = result.response.text().trim()
 
-  if (!text) {
-    throw new Error('Gemini returned an empty response')
-  }
-
+  if (!text) throw new Error('Gemini returned an empty response')
   return text
 }
 
@@ -67,18 +125,14 @@ async function generateWithAnthropic(prompt: string): Promise<string> {
     messages: [{ role: 'user', content: prompt }],
   })
 
-  const text = message.content.reduce((combinedText, block) => {
-    if (block.type === 'text') {
-      return combinedText + block.text
-    }
+  const text = message.content
+    .reduce((combined, block) => {
+      if (block.type === 'text') return combined + block.text
+      return combined
+    }, '')
+    .trim()
 
-    return combinedText
-  }, '').trim()
-
-  if (!text) {
-    throw new Error('Anthropic returned an empty response')
-  }
-
+  if (!text) throw new Error('Anthropic returned an empty response')
   return text
 }
 
@@ -92,69 +146,40 @@ function getProviderOrder(): AIProvider[] {
   }
 
   if (!hasGeminiKey && !hasAnthropicKey) {
-    throw new Error(
-      'Missing AI API key. Set GEMINI_API_KEY, GOOGLE_API_KEY, or ANTHROPIC_API_KEY.'
-    )
+    throw new Error('Missing AI API key. Set GEMINI_API_KEY, GOOGLE_API_KEY, or ANTHROPIC_API_KEY.')
   }
 
   if (preferredProvider === 'gemini') {
-    if (!hasGeminiKey) {
-      throw new Error('AI_PROVIDER is set to "gemini" but no Gemini API key was found.')
-    }
-
+    if (!hasGeminiKey) throw new Error('AI_PROVIDER is set to "gemini" but no Gemini API key was found.')
     return hasAnthropicKey ? ['gemini', 'anthropic'] : ['gemini']
   }
 
   if (preferredProvider === 'anthropic') {
-    if (!hasAnthropicKey) {
-      throw new Error('AI_PROVIDER is set to "anthropic" but no Anthropic API key was found.')
-    }
-
+    if (!hasAnthropicKey) throw new Error('AI_PROVIDER is set to "anthropic" but no Anthropic API key was found.')
     return hasGeminiKey ? ['anthropic', 'gemini'] : ['anthropic']
   }
 
-  if (hasGeminiKey && hasAnthropicKey) {
-    return ['gemini', 'anthropic']
-  }
-
+  if (hasGeminiKey && hasAnthropicKey) return ['gemini', 'anthropic']
   return hasGeminiKey ? ['gemini'] : ['anthropic']
 }
 
 function getGeminiClient(): GoogleGenerativeAI {
   const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY
-
-  if (!apiKey) {
-    throw new Error('Missing Gemini API key. Set GEMINI_API_KEY or GOOGLE_API_KEY.')
-  }
-
-  if (!geminiClient) {
-    geminiClient = new GoogleGenerativeAI(apiKey)
-  }
-
+  if (!apiKey) throw new Error('Missing Gemini API key.')
+  if (!geminiClient) geminiClient = new GoogleGenerativeAI(apiKey)
   return geminiClient
 }
 
 function getAnthropicClient(): Anthropic {
   const apiKey = process.env.ANTHROPIC_API_KEY
-
-  if (!apiKey) {
-    throw new Error('Missing Anthropic API key. Set ANTHROPIC_API_KEY.')
-  }
-
-  if (!anthropicClient) {
-    anthropicClient = new Anthropic({ apiKey })
-  }
-
+  if (!apiKey) throw new Error('Missing Anthropic API key.')
+  if (!anthropicClient) anthropicClient = new Anthropic({ apiKey })
   return anthropicClient
 }
 
 function shouldTryFallback(error: unknown): boolean {
   const status = getErrorStatus(error)
-
-  if (status === 401 || status === 403 || status === 429) {
-    return true
-  }
-
+  if (status === 401 || status === 403 || status === 429) return true
   return typeof status === 'number' && status >= 500
 }
 
@@ -162,15 +187,11 @@ function getErrorStatus(error: unknown): number | undefined {
   if (error instanceof GoogleGenerativeAIFetchError || error instanceof AnthropicAPIError) {
     return error.status
   }
-
   return undefined
 }
 
 function normalizeProviderError(error: unknown, provider: AIProvider): Error {
-  if (provider === 'gemini') {
-    return normalizeGeminiError(error)
-  }
-
+  if (provider === 'gemini') return normalizeGeminiError(error)
   return normalizeAnthropicError(error)
 }
 
@@ -179,11 +200,7 @@ function normalizeGeminiError(error: unknown): Error {
     if (error.status === 401 || error.status === 403) {
       return new Error('Invalid Gemini API key. Check GEMINI_API_KEY or GOOGLE_API_KEY.')
     }
-
-    if (error.status === 429) {
-      return new Error(buildGeminiQuotaMessage(error))
-    }
-
+    if (error.status === 429) return new Error(buildGeminiQuotaMessage(error))
     if (typeof error.status === 'number' && error.status >= 500) {
       return new Error('Gemini is temporarily unavailable. Please try again in a moment.')
     }
@@ -193,7 +210,6 @@ function normalizeGeminiError(error: unknown): Error {
     if (error.message.includes('API_KEY') || error.message.includes('401')) {
       return new Error('Invalid Gemini API key. Check GEMINI_API_KEY or GOOGLE_API_KEY.')
     }
-
     return new Error(`Gemini generation failed: ${error.message}`)
   }
 
@@ -204,25 +220,18 @@ function normalizeAnthropicError(error: unknown): Error {
   if (error instanceof AnthropicRateLimitError) {
     return new Error('Anthropic rate limit reached. Please wait a moment and try again.')
   }
-
   if (error instanceof AnthropicAPIError) {
     if (error.status === 401 || error.status === 403) {
       return new Error('Invalid Anthropic API key. Check ANTHROPIC_API_KEY.')
     }
-
     if (error.status === 429) {
       return new Error('Anthropic rate limit reached. Please wait a moment and try again.')
     }
-
     if (typeof error.status === 'number' && error.status >= 500) {
       return new Error('Anthropic is temporarily unavailable. Please try again in a moment.')
     }
   }
-
-  if (error instanceof Error) {
-    return new Error(`Anthropic generation failed: ${error.message}`)
-  }
-
+  if (error instanceof Error) return new Error(`Anthropic generation failed: ${error.message}`)
   return new Error('Anthropic generation failed due to an unknown error')
 }
 
@@ -232,18 +241,13 @@ function buildGeminiQuotaMessage(error: GoogleGenerativeAIFetchError): string {
   const hasNoProjectQuota = message.includes('limit: 0')
 
   if (hasNoProjectQuota) {
-    return 'Gemini quota is unavailable for this project. Add billing, use a project with quota, or switch to another provider.'
+    return 'Gemini quota is unavailable for this project. Add billing or switch to another provider.'
   }
-
-  if (retryDelay) {
-    return `Gemini rate limit reached. Please retry in about ${retryDelay}.`
-  }
-
+  if (retryDelay) return `Gemini rate limit reached. Please retry in about ${retryDelay}.`
   return 'Gemini rate limit reached. Please wait a moment and try again.'
 }
 
 function extractRetryDelay(message: string): string | null {
   const match = message.match(/Please retry in ([^.\]]+)/i)
-
   return match?.[1]?.trim() ?? null
 }
