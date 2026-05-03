@@ -56,7 +56,6 @@ export async function GET(request: Request) {
     console.log('NO CODE IN URL!')
   }
 
-  console.log('=== CALLBACK END ===')
   
   return NextResponse.redirect(`${origin}/dashboard`)
 }

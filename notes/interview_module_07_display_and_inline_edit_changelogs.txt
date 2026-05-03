@@ -1,0 +1,382 @@
+GitLog AI Interview Study Notes
+Module 07: Display and Inline Edit Changelogs
+
+Purpose of this file
+  This is a study resource for the changelog display and inline-edit module of GitLog AI.
+  The questions are phrased like realistic interview questions a 1-year-experience full-stack candidate may get.
+  The answers are beginner-friendly, but still show actual understanding.
+  This file is grounded in your project, but written in interview language rather than code-review language.
+
+Module scope
+  In GitLog AI, this module starts after AI generation succeeds and the app needs to present the changelog in a structured, editable way.
+  It includes:
+    generated changelog panel rendering
+    empty, loading, success, and error display states
+    category-based preview structure
+    inline editing for titles and descriptions
+    local edited vs original state
+    edit tracking and reset behavior
+    remount behavior after regeneration
+    current action buttons and missing persistence
+    UX and maintainability tradeoffs
+
+Project areas connected to this module
+  components/ChangelogPreview.tsx
+  components/GeneratorClient.tsx
+  types/changelog.ts
+  app/api/generate/route.ts
+
+Main topics this module can generate questions from
+  structured rendering
+  local editing state
+  immutable updates
+  original vs edited copies
+  reset behavior
+  optimistic UI thinking
+  controlled inputs
+  conditional rendering
+  empty state UX
+  editability vs persistence
+  component remounting
+  data model tradeoffs
+  product completeness gaps
+
+Must Know First
+
+1. What does this module do in product terms?
+  Simple answer
+    This module takes the AI-generated changelog and turns it into something the user can actually review and refine. It does not just show raw JSON. It organizes the result by category, presents entries clearly, and lets the user edit titles and descriptions inline before using the output elsewhere.
+
+2. What is the main product goal here?
+  Must know deeply
+    The main goal is human control after AI generation.
+
+  Good answer
+    The AI gives the first draft, but the user should still be able to review and adjust the final wording. That makes the product more trustworthy and practical, because release notes usually still need a human pass even when AI gets them mostly right.
+
+3. What is the technical flow in one short explanation?
+  Simple answer
+    `GeneratorClient` manages generation state and, when generation succeeds, passes a structured `ChangelogResult` into `ChangelogPreview`. The preview creates a local editable copy of the AI result, compares it with the original copy to track edits, and renders each populated category with inline editing controls.
+
+4. Why is this module important in interviews?
+  Simple answer
+    Because it shows how you turn structured backend output into a usable frontend editing experience. It covers UI state modeling, immutable updates, reset behavior, conditional rendering, and product thinking around AI-human collaboration.
+
+Section 1: Display flow and rendering states
+
+1. How does the generated changelog appear in the UI?
+  Answer Brief
+    After the user clicks Generate Changelog, `GeneratorClient` calls the generate API and stores the resulting structured changelog in local state. The right-hand panel then switches from placeholder or loading state into the rendered preview, which is handled by `ChangelogPreview`.
+
+2. What rendering states exist in the generated changelog panel?
+  Answer Brief
+    It has multiple states:
+    no changelog generated yet
+    generation loading
+    generation error
+    successful generated changelog
+    and, inside the preview, an additional empty-result state if the AI returns no meaningful entries
+
+3. Why is it good that these states are explicit?
+  Answer Brief
+    Because AI workflows are not instant or perfectly reliable. Users need clear feedback about whether generation has not started, is in progress, failed, or succeeded.
+
+4. Why is the generated panel separated from the configuration and commit panels?
+  Answer Brief
+    Because it is a different stage of the workflow. The left side is about selecting and reviewing inputs, while the right side is about reviewing and editing the output. That separation helps users focus.
+
+5. Why display metadata like tone, repo, commit count, and generation time?
+  Answer Brief
+    Because it gives context to the generated result. The user can immediately see what input conditions produced the current changelog, which matters when regenerating with different tones or commit selections.
+
+Section 2: Data model and rendering structure
+
+6. What shape does the changelog data have in your UI?
+  Must know deeply
+    This is one of the most important answers in this module.
+
+  Good answer
+    The UI receives a structured `ChangelogResult` object with category arrays like `features`, `bugFixes`, `improvements`, `breakingChanges`, and `chore`. Each entry contains a `title`, a `description`, and the related commit SHA list. This is much easier to render and edit than a single big markdown string.
+
+7. Why is a structured changelog object better than just rendering markdown directly?
+  Answer Brief
+    Because structured data is easier to validate, easier to render consistently, easier to edit inline, and easier to transform later into other formats like markdown or saved history records.
+
+8. Why does the preview render only populated categories?
+  Answer Brief
+    Because showing empty sections adds noise. If a category has no entries, it is cleaner to omit it from the visible output and let the user focus only on meaningful content.
+
+9. Why keep a category config array instead of hardcoding every section separately?
+  Answer Brief
+    Because it reduces duplication and makes rendering more maintainable. A config-driven rendering pattern is easier to extend and keeps the component cleaner.
+
+10. What is one benefit of showing commit SHAs inside each changelog entry?
+  Answer Brief
+    It preserves traceability. Even after the AI groups and rewrites changes, the user can still see which commits support each entry.
+
+Section 3: Inline editing design
+
+11. How does inline editing work in your preview?
+  Must know deeply
+    This is one of the strongest frontend-state answers in this module.
+
+  Good answer
+    The preview stores two copies of the changelog:
+    one editable copy that changes as the user types
+    and one original copy that represents the AI-generated baseline
+    It also stores which entry is currently being edited. When the user clicks a title or description, that entry switches into input or textarea mode. When the user edits, only the local editable copy changes.
+
+12. Why keep both `edited` and `original` copies?
+  Answer Brief
+    Because I need to support reset behavior and detect whether an entry has changed. Without the original baseline, I would not know whether the current value is edited or how to restore it.
+
+13. Why is that a good design for inline editing?
+  Answer Brief
+    Because it is simple, local, and predictable. The user can freely edit the preview without affecting the original generated result, and the UI can clearly track what changed.
+
+14. What is `editingKey` solving?
+  Answer Brief
+    It identifies which specific entry is currently in editing mode. That lets the component switch only one entry at a time between read mode and edit mode.
+
+15. Why is only one entry actively editable at a time?
+  Answer Brief
+    It simplifies the UI and reduces state complexity. For this product, one-at-a-time editing is a reasonable choice because changelog entry edits are small and focused.
+
+16. Why use controlled inputs here?
+  Answer Brief
+    Because the displayed values should stay fully in sync with component state. Controlled inputs make it easy to update local state, compare edits against the original, and support reset behavior reliably.
+
+17. Why is immutable update logic important in this component?
+  Answer Brief
+    Because React state updates should produce new objects instead of mutating existing state directly. That keeps rendering predictable and makes change detection safer.
+
+Section 4: Edit tracking and reset behavior
+
+18. How do you know whether an entry has been edited?
+  Answer Brief
+    The component compares the current editable entry with the corresponding entry from the original AI result. If either the title or description differs, the entry is considered edited.
+
+19. Why is edit detection useful?
+  Answer Brief
+    Because it lets the UI show an "edited" indicator and enables reset behavior only when it is meaningful. That gives users feedback about what they have changed.
+
+20. Why is per-entry reset a good UX choice?
+  Must know deeply
+    This is a strong practical answer.
+
+  Good answer
+    Because users often want to experiment with wording on a single item without losing the rest of their edits. Per-entry reset is more precise and less frustrating than forcing a full reset of the entire changelog.
+
+21. Why does reset use the original AI entry instead of trying to undo step by step?
+  Answer Brief
+    Because the user’s goal is usually to get back to the AI baseline, not to walk back every keystroke manually. Resetting from the original source is simpler and more reliable.
+
+22. What is one limitation of the current edit model?
+  Answer Brief
+    The edits exist only in local component state. If the page is refreshed or the user navigates away, the changes are lost because there is no persistence yet.
+
+Section 5: Regeneration and remount behavior
+
+23. What happens to edits if the user regenerates the changelog?
+  Must know deeply
+    This is a very realistic interview question.
+
+  Good answer
+    When a new changelog is generated, `GeneratorClient` passes a new key into `ChangelogPreview` based on generation metadata. That causes the preview to remount, so its local editable state is reset to the new AI result. This makes regeneration clean and predictable, but it also means previous local edits are intentionally discarded.
+
+24. Why is remounting the preview a reasonable design here?
+  Answer Brief
+    Because a regenerated changelog is effectively a new baseline. Resetting local edit state avoids mixing edits from an older generation with a newer AI result.
+
+25. What is the tradeoff of this remount-based reset?
+  Answer Brief
+    It is clean and simple, but it means the user loses unsaved inline edits when they regenerate. That is acceptable for the current version, but a more advanced product might warn the user or support version history.
+
+26. Why is this a good thing to mention in an interview?
+  Answer Brief
+    Because it shows you understand not only the implementation, but also the user experience consequences of how state is reset.
+
+Section 6: UX and product thinking
+
+27. Why make AI output editable instead of expecting users to accept it as-is?
+  Must know deeply
+    This is one of the strongest product answers in the project.
+
+  Good answer
+    Because AI output is a draft, not a perfect final artifact. Changelogs are user-facing communication, so wording matters. Inline editing lets users quickly refine titles and descriptions without leaving the product or copying everything into another tool.
+
+28. Why edit only titles and descriptions, but not commit SHAs?
+  Answer Brief
+    Because titles and descriptions are the human-facing wording, which is exactly what users most often want to refine. Commit SHAs are reference metadata and usually should stay tied to the generated item for traceability.
+
+29. Why is click-to-edit a good interaction here?
+  Answer Brief
+    Because it keeps the preview visually clean until editing is needed. Users can read the changelog in a polished format first, and only switch into inputs when they actually want to refine wording.
+
+30. What are the current product gaps in this module?
+  Answer Brief
+    The biggest gaps are that copy, download, and save-to-history actions are visible but not implemented, and edits are not persisted anywhere. So the preview experience is strong locally, but the workflow is not yet fully complete.
+
+31. Why is that still a good interview topic?
+  Answer Brief
+    Because it gives you room to talk about incremental product building. The current module proves the core workflow and editing model, while also making it clear what would be needed for a production-ready finish.
+
+Section 7: Frontend architecture and maintainability
+
+32. Why keep editing local to `ChangelogPreview` instead of lifting it all into `GeneratorClient`?
+  Answer Brief
+    Because the editing concern belongs to the preview itself. Keeping it local reduces parent-level complexity and keeps the editing logic close to the UI that uses it.
+
+33. When would lifting this state upward make sense?
+  Answer Brief
+    It would make sense if I needed persistence, cross-component actions, export based on edited content, or unsaved-change tracking at the page level. At that point, the edited changelog state would need to be shared more broadly.
+
+34. What is one maintainability strength of the current component?
+  Answer Brief
+    The component uses a config-driven category list and a consistent entry-rendering pattern, which keeps the preview structure reasonably scalable across categories.
+
+35. What is one maintainability weakness?
+  Answer Brief
+    The preview component already handles rendering, editing state, reset logic, and change detection all in one file. It is still manageable, but if more editing features are added, it may need to be split into smaller subcomponents or hooks.
+
+36. Would a reducer make sense here?
+  Answer Brief
+    It could, especially if editing actions become more complex, like adding entries, deleting entries, bulk reset, or persistence states. For the current level of interaction, `useState` is still understandable.
+
+Section 8: Missing persistence and export features
+
+37. What happens to edits if the user refreshes the page?
+  Answer Brief
+    They are lost, because the edited changelog exists only in client-side component state right now.
+
+38. Why is that acceptable for now but still worth calling out?
+  Answer Brief
+    It is acceptable for a working product prototype or early version because the core review-and-edit experience is present. But for a more complete product, users would expect copy, download, and save functionality to work with the edited content too.
+
+39. What would you need to add to support save-to-history properly?
+  Must know deeply
+    This is a strong systems-thinking answer.
+
+  Good answer
+    I would need a backend persistence route or data layer for saving the edited changelog, not just the AI result. I would also need to decide whether history stores the raw AI output, the user-edited output, or both. Then the UI would need unsaved-change handling and probably a clearer save state.
+
+40. What would you need to add to support copy and download properly?
+  Answer Brief
+    I would need a formatter that converts the current edited structured changelog into exportable text, most likely markdown. Then the copy action would use the edited version, and the download action would generate a file from that same edited state.
+
+41. Why is this a good product-design discussion?
+  Answer Brief
+    Because it shows the difference between having a nice local preview and having a complete output workflow. Real users care about what they can do with the edited result afterward.
+
+Section 9: Honest critique and improvement areas
+
+42. If an interviewer asks you to critique this module honestly, what would you say?
+  Must know deeply
+    This is one of the strongest balanced answers in the frontend side of the project.
+
+  Good answer
+    I would say the module does a good job turning structured AI output into a human-reviewable, inline-editable interface. The biggest strengths are clear category rendering, simple local edit tracking, and per-entry reset. The biggest gaps are missing persistence and export actions, plus the fact that edits are local-only and are lost on refresh or regeneration. So it is a strong UX prototype of the final experience, but not the full end-state workflow yet.
+
+43. Why is that a strong answer?
+  Answer Brief
+    Because it is balanced. You are acknowledging both the working strengths and the remaining product gaps without pretending the module is more complete than it is.
+
+44. What is one improvement you would prioritize first?
+  Answer Brief
+    I would prioritize turning copy and download into real actions that operate on the edited changelog state, because that would immediately make the module more useful without requiring full database persistence first.
+
+45. What is one UX improvement you could mention?
+  Answer Brief
+    I would consider making edit affordances a bit more explicit on touch devices, since hover-based hints work better on desktop than mobile.
+
+46. What is one data-model improvement you could mention?
+  Answer Brief
+    I could distinguish more clearly between generated content, edited content, and persisted content in the state model if the module grows further.
+
+Section 10: Testing and debugging
+
+47. How would you test this module?
+  Answer Brief
+    I would test:
+    loading, error, empty, and success display states
+    category rendering only when entries exist
+    click-to-edit behavior for title and description
+    edited indicator behavior
+    per-entry reset behavior
+    regeneration resetting the preview state
+    correct rendering of commit SHA chips
+    no-meaningful-changes empty preview state
+    copy/download/save button behavior once implemented
+
+48. If a user says "My edits disappeared," how would you debug it?
+  Must know deeply
+    This is a good practical interview answer.
+
+  Good answer
+    I would first check whether the changelog was regenerated, because regeneration intentionally remounts the preview and resets local state. Then I would check whether the user refreshed the page or navigated away, since edits are not persisted. If neither happened, I would inspect whether a key change or parent rerender is causing the preview to remount unexpectedly.
+
+49. What is a realistic bug in the current edit flow?
+  Answer Brief
+    A realistic issue is that a user may think "Done" means the edit is saved permanently, when in reality it only exits editing mode locally. That is more of a product-communication bug than a rendering bug, but it matters.
+
+50. What is a realistic bug in the current rendering flow?
+  Answer Brief
+    A realistic issue is accidental remounting of the preview if the key changes unexpectedly, which would wipe local edits. That is why understanding how key-based remounting works is important here.
+
+51. Why is this module a good place to discuss local state vs persisted state?
+  Answer Brief
+    Because it clearly separates them. The current module is intentionally local-first, which is simple and fast, but it also highlights the limitations of not having persistence yet.
+
+Section 11: Strong answers to practice
+
+1. Explain the display-and-edit module in one strong answer
+  Strong study answer
+    In GitLog AI, once AI generation succeeds, the result is shown in a dedicated preview panel that renders the changelog as structured categories like Features and Bug Fixes. Instead of showing raw JSON or plain markdown, I render typed entries with titles, descriptions, and supporting commit SHAs. The preview keeps a local editable copy of the AI result as well as the original version, so users can edit titles and descriptions inline, see which entries changed, and reset any entry back to the AI baseline. The current version is intentionally local-first, which makes the editing experience fast and simple, though persistence and export actions are still the next step.
+
+2. Explain why you keep both original and edited copies
+  Strong study answer
+    I keep both because inline editing needs a stable baseline. The edited copy drives the UI, while the original copy lets me detect changes and support precise reset behavior. Without both, it would be much harder to tell whether an entry was modified or to restore it cleanly.
+
+3. Explain the biggest tradeoff in this module
+  Strong study answer
+    The biggest tradeoff is simplicity versus completeness. The current local editing model is clean and responsive, but it does not persist changes yet. That means the user gets a strong review-and-edit experience, but not a full save/export workflow yet.
+
+4. Explain the biggest product value of inline editing
+  Strong study answer
+    The biggest value is that it keeps humans in control of AI output. The AI gives a structured first draft, but the user can quickly refine wording in place without leaving the product or rewriting everything manually.
+
+Study checklist for this module
+  Make sure you can explain:
+    why the generated preview is structured by category
+    why editing is local to the preview component
+    why both original and edited copies exist
+    how edit detection works
+    why per-entry reset exists
+    what regeneration does to local edits
+    why copy/download/save are still incomplete
+    what would be needed for persistence
+    what the current UX strengths are
+    what the current product gaps are
+
+Mini practice script
+  If the interviewer says:
+    "Tell me how the generated changelog is displayed and edited in your project."
+
+  A strong simple answer is:
+    "After generation succeeds, GitLog AI renders the changelog in a structured preview instead of showing raw model output. The preview groups entries into categories like Features, Bug Fixes, and Improvements, and each entry also shows the related commit SHAs for traceability. I let the user edit titles and descriptions inline by keeping two local copies of the data: the original AI result and an editable copy. That lets me track whether an entry changed and reset it back to the AI version if needed. Right now the edits are local-only, so copy, download, and persistence are the next product steps."
+
+What comes after Module 07
+  The requested module breakdown is now covered end to end:
+    landing page
+    authentication
+    dashboard and repo fetch
+    repo entry and date or tag range selection
+    commit history fetch
+    changelog generation
+    display and inline edit changelogs
+
+Recommended next step
+  If you want, I can now create one final consolidated study file that:
+    groups the highest-frequency interview questions across all modules
+    identifies the top 30 questions most likely to be asked
+    adds a "what to say in 30 seconds vs 2 minutes" answer format

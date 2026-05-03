@@ -1,3 +1,4 @@
+// types/changelog.ts
 import type { CommitData } from '@/types/github'
 
 export type ChangelogTone = 'technical' | 'user-friendly' | 'marketing'

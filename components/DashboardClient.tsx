@@ -21,9 +21,17 @@ export default function DashboardClient() {
     fetchRepos();
   }, []);
 
+  // useEffect(() => {
+  //   filterAndSortRepos();
+  // }, [searchQuery, sortBy, repos,]);
+
   useEffect(() => {
+  const timeout = setTimeout(() => {
     filterAndSortRepos();
-  }, [searchQuery, sortBy, repos]);
+  }, 300);
+
+  return () => clearTimeout(timeout);
+}, [searchQuery, sortBy, repos]);
 
   const fetchRepos = async () => {
     try {
@@ -221,7 +229,7 @@ export default function DashboardClient() {
           <>
             {/* Results Count */}
             <div className="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-sm text-[#e6f8ea]">
-              <span className="break-words">
+              <span className="wrap-break-word">
                 Showing {visibleRepos.length} of {filteredRepos.length}{" "}
                 repositories
                 {searchQuery && ` matching "${searchQuery}"`}

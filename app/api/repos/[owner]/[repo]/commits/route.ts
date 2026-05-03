@@ -1,3 +1,5 @@
+// app/api/repos/[owner]/[repo]/commits/route.ts
+
 import { createClient } from '@/lib/supabase/server'
 import { createGitHubClient } from '@/lib/github'
 import { NextResponse } from 'next/server'
@@ -193,7 +195,7 @@ export async function POST(request: Request, { params }: RouteParams) {
       message: c.message.length > 500 ? c.message.substring(0, 500) + '...' : c.message,
     }))
 
-    // Compute stats (Task 5.11)
+    // Stats Aggregation
     const contributors = [...new Set(filtered.map((c) => c.author))]
     const totalAdditions = filtered.reduce((sum, c) => sum + c.additions, 0)
     const totalDeletions = filtered.reduce((sum, c) => sum + c.deletions, 0)

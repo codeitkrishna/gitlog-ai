@@ -1,3 +1,4 @@
+// types/github.ts
 export interface GitHubRepository {
   id: number
   node_id: string
@@ -14,8 +15,8 @@ export interface GitHubRepository {
   language: string | null
   stargazers_count: number
   forks_count: number
-  updated_at: string | null  // ← Changed to allow null
-  created_at: string
+  updated_at: string | null
+  created_at: string | null
   topics?: string[]
   default_branch: string
   [key: string]: unknown
@@ -30,7 +31,7 @@ export interface Repository {
   owner: string
   language: string | null
   stars: number
-  updatedAt: string | null  // ← Changed to allow null
+  updatedAt: string | null 
   isPrivate: boolean
   url: string
 }

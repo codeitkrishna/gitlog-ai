@@ -1,0 +1,743 @@
+Interview Study Notes
+Doc 3: JavaScript and TypeScript
+
+Purpose of this file
+  This is a broad study document for JavaScript and TypeScript interview preparation.
+  It is not tied closely to one project.
+  The goal is to help you prepare for language-focused rounds and the kind of questions that appear in frontend, full-stack, and backend interviews.
+
+How to use this file
+  1. Study JavaScript first because TypeScript builds on top of it.
+  2. Focus on concepts, not only syntax.
+  3. Practice explaining not just what something is, but why it matters.
+  4. Be ready to compare similar concepts:
+     var vs let vs const
+     == vs ===
+     interface vs type
+     any vs unknown
+     union vs intersection
+
+What this doc covers
+  JavaScript
+    core language fundamentals
+    scope and closures
+    objects and prototypes
+    `this`
+    async behavior
+    modules
+    array/object operations
+    common interview traps
+
+  TypeScript
+    why it exists
+    type system fundamentals
+    narrowing
+    generics
+    utility types
+    interfaces vs types
+    practical tradeoffs
+    common interview traps
+
+Part 1: JavaScript
+
+1. What JavaScript really is
+  JavaScript is a high-level, dynamically typed, prototype-based programming language used in browsers, servers, and many tooling environments.
+
+  Short answer
+    JavaScript is a dynamic programming language used for web development and beyond.
+
+  Better answer
+    JavaScript is a flexible, event-driven language that supports functional, object-oriented, and imperative styles, and is especially important because it powers both browser applications and server-side runtimes like Node.js.
+
+2. Interpreted vs compiled
+  In interview discussions, JavaScript is often casually called "interpreted," but modern JavaScript engines like V8 use JIT compilation techniques.
+
+  Safe answer
+    JavaScript is executed by modern engines that parse, optimize, and compile code dynamically at runtime.
+
+3. Dynamic typing
+  JavaScript is dynamically typed, which means variable types are checked at runtime rather than fixed at compile time.
+
+  Why this matters
+    It gives flexibility but also increases the chance of runtime errors if not handled carefully.
+
+4. Primitive types
+  JavaScript primitive types include:
+    string
+    number
+    bigint
+    boolean
+    undefined
+    symbol
+    null
+
+  Important interview point
+    `null` is a primitive, even though `typeof null` is `"object"`, which is a long-standing JavaScript quirk.
+
+5. Reference types
+  Objects, arrays, and functions are reference types.
+  They are stored and compared differently from primitives.
+
+  Common question
+    Why are two objects with the same values not equal using `===`?
+
+  Good answer
+    Because objects are compared by reference, not by deep value equality.
+
+6. var, let, and const
+  `var`
+    function-scoped
+    hoisted differently
+    can be redeclared
+
+  `let`
+    block-scoped
+    can be reassigned
+    cannot be redeclared in the same scope
+
+  `const`
+    block-scoped
+    cannot be reassigned
+    for objects and arrays, the reference is constant but internal values can still change
+
+  Common interview question
+    When should you use each?
+
+  Good answer
+    Prefer `const` by default, use `let` when reassignment is needed, and avoid `var` in modern code unless discussing legacy behavior.
+
+7. Hoisting
+  Hoisting means declarations are processed before code execution in a scope.
+
+  Important clarification
+    `var` is hoisted and initialized with `undefined`.
+    `let` and `const` are hoisted too, but they stay in the temporal dead zone until execution reaches their declaration.
+
+8. Temporal Dead Zone
+  This is the period between entering scope and actually initializing a `let` or `const` variable.
+
+  Why it matters
+    Accessing the variable too early causes a runtime error instead of returning `undefined`.
+
+9. Scope
+  Main scope types to know
+    global scope
+    function scope
+    block scope
+    lexical scope
+
+  Common interview question
+    What is lexical scope?
+
+  Good answer
+    Lexical scope means scope is determined by where variables and functions are written in the code, not by where they are called from.
+
+10. Closures
+  A closure happens when a function remembers variables from its outer scope even after the outer function has finished execution.
+
+  Why closures matter
+    They are heavily used in callbacks, hooks, private data patterns, and module design.
+
+  Common interview question
+    Give a practical use of closures.
+
+  Good answer
+    Closures are useful for preserving state between function calls, like debounced functions, factory functions, private counters, and React hook behavior patterns.
+
+11. this keyword
+  `this` in JavaScript depends on how a function is called, not where it is defined, except in arrow functions.
+
+  Common cases
+    global context
+    object method
+    constructor call
+    explicit binding with call/apply/bind
+    arrow functions
+
+  Common interview question
+    Why is `this` confusing in JavaScript?
+
+  Good answer
+    Because its value depends on invocation context rather than lexical definition in normal functions, while arrow functions behave differently and capture lexical `this`.
+
+12. Arrow functions
+  Arrow functions have shorter syntax and do not get their own `this`, `arguments`, or `super` in the usual way.
+
+  Important point
+    Arrow functions are great for callbacks, but they are not always a drop-in replacement for every normal function.
+
+13. call, apply, and bind
+  `call`
+    invokes immediately with explicit `this`
+
+  `apply`
+    invokes immediately with explicit `this`, arguments as array
+
+  `bind`
+    returns a new function with fixed `this`
+
+14. == vs ===
+  `==`
+    loose equality
+    allows type coercion
+
+  `===`
+    strict equality
+    no type coercion
+
+  Best practice
+    Prefer `===` in most cases.
+
+15. Truthy and falsy values
+  Falsy values include:
+    false
+    0
+    -0
+    0n
+    ""
+    null
+    undefined
+    NaN
+
+  Why this matters
+    It affects conditions, short-circuit logic, and common bugs.
+
+16. Type coercion
+  JavaScript can convert values between types automatically in some operations.
+
+  Why interviewers ask
+    They want to know whether you understand hidden behavior and can avoid subtle bugs.
+
+17. Objects
+  Objects store key-value pairs and form the basis of much of JavaScript programming.
+
+  Important things to know
+    property access
+    computed keys
+    reference behavior
+    shallow vs deep copy
+
+18. Arrays
+  Arrays are ordered collections with many useful built-in methods.
+
+  Common methods to know
+    map
+    filter
+    reduce
+    find
+    some
+    every
+    sort
+    forEach
+
+19. Mutating vs non-mutating array methods
+  Mutating examples
+    push
+    pop
+    shift
+    unshift
+    splice
+    sort
+    reverse
+
+  Non-mutating examples
+    map
+    filter
+    reduce
+    slice
+    concat
+
+  Important interview point
+    This matters especially in React, where immutable updates are usually preferred.
+
+20. Spread and rest operators
+  Spread
+    expands arrays/objects into individual elements or properties
+
+  Rest
+    collects remaining values into an array or object
+
+  Common uses
+    copying arrays
+    merging objects
+    gathering function arguments
+
+21. Destructuring
+  Destructuring extracts values from arrays or objects into variables.
+
+  Why it matters
+    Cleaner code
+    easier function parameter handling
+    very common in modern JavaScript and React
+
+22. Functions are first-class citizens
+  In JavaScript, functions can be:
+    assigned to variables
+    passed as arguments
+    returned from other functions
+
+  Why this matters
+    It enables callbacks, higher-order functions, and functional patterns.
+
+23. Higher-order functions
+  A higher-order function is a function that takes another function as an argument or returns one.
+
+  Common examples
+    map
+    filter
+    reduce
+    event handlers
+    middleware patterns
+
+24. Prototypes and prototypal inheritance
+  JavaScript uses prototypes instead of traditional class-based inheritance at its core.
+
+  Good interview answer
+    Objects can inherit behavior from other objects through the prototype chain.
+
+25. prototype vs __proto__
+  Practical interview-safe answer
+    `prototype` is mainly a property on constructor functions used for shared methods.
+    `__proto__` refers to the internal prototype of an object instance.
+
+26. Classes in JavaScript
+  Classes are mostly syntactic sugar over JavaScript’s prototype system.
+
+  Important interview point
+    JavaScript classes look similar to classes in other languages, but under the hood they still use prototypes.
+
+27. Map vs object
+  Object
+    common for simple key-value storage
+
+  Map
+    better when keys are dynamic, not just strings/symbols
+    preserves insertion order clearly
+    offers useful API methods
+
+28. Set
+  A Set stores unique values.
+
+  Common use cases
+    deduplication
+    membership checks
+
+29. JSON
+  JSON is a text format for structured data exchange.
+
+  Important point
+    JSON is not the same as a JavaScript object, though they look similar.
+
+30. Synchronous vs asynchronous code
+  Synchronous code runs line by line and blocks until finished.
+  Asynchronous code allows the system to continue while waiting on external work.
+
+31. Callbacks
+  Callbacks were a common older pattern for async JavaScript.
+
+  Problem
+    deeply nested callbacks can become hard to read and maintain
+
+32. Promises
+  A Promise represents a future value: pending, fulfilled, or rejected.
+
+  Why Promises matter
+    They improve async flow compared to raw callbacks.
+
+33. async/await
+  `async/await` is syntax built on top of Promises that makes asynchronous code easier to read.
+
+  Important point
+    `await` pauses inside the async function, but does not block the whole runtime.
+
+34. Promise.all vs Promise.allSettled
+  Promise.all
+    fails fast if one promise rejects
+
+  Promise.allSettled
+    waits for all promises and returns each result status
+
+35. Event loop basics for JavaScript
+  JavaScript execution uses:
+    call stack
+    task queues
+    microtask queue
+    event loop coordination
+
+  Common interview question
+    Why does a Promise callback run before setTimeout?
+
+  Good answer
+    Because promise callbacks are microtasks and are processed before the next macrotask such as setTimeout.
+
+36. Modules
+  JavaScript supports modular code organization.
+
+  Common systems
+    CommonJS
+    ES modules
+
+37. Strict mode
+  Strict mode changes some JavaScript behavior to make code safer and more predictable.
+
+  Common benefits
+    prevents some silent errors
+    restricts problematic features
+
+38. Debouncing vs throttling
+  Debouncing
+    waits until activity stops before running
+
+  Throttling
+    limits how often something can run over time
+
+  Common use cases
+    search input
+    resize events
+    scroll handlers
+
+39. JavaScript interview traps
+  Be careful with these
+    not understanding closures
+    not understanding `this`
+    confusing prototype with class-based inheritance from other languages
+    saying async code is automatically parallel
+    not knowing mutation vs immutability
+    weak understanding of event loop basics
+
+40. JavaScript short speaking answer
+  "JavaScript is a dynamic, prototype-based language that supports multiple programming styles. For interviews, I focus on scope, closures, objects, prototypes, async behavior, and the event loop because those are the concepts that explain most real-world JavaScript behavior."
+
+Part 2: TypeScript
+
+1. What TypeScript really is
+  TypeScript is a superset of JavaScript that adds static type checking and tooling benefits.
+
+  Short answer
+    TypeScript is JavaScript with a static type system.
+
+  Better answer
+    TypeScript helps catch errors earlier, improve code readability, and make large codebases easier to maintain by adding compile-time type checking on top of JavaScript.
+
+2. Why TypeScript exists
+  Common reasons
+    catch bugs earlier
+    improve editor tooling and autocomplete
+    improve refactoring safety
+    make contracts between parts of the code clearer
+
+3. Static typing vs dynamic typing
+  JavaScript
+    dynamic typing at runtime
+
+  TypeScript
+    static analysis at compile time, then compiles to JavaScript
+
+  Important point
+    TypeScript does not change JavaScript runtime behavior by itself. It improves correctness before runtime.
+
+4. Type inference
+  TypeScript can infer many types automatically.
+
+  Good interview answer
+    Type inference means TypeScript often understands the type without you having to annotate everything manually.
+
+5. Explicit typing
+  Sometimes you should annotate types clearly when:
+    the intent is not obvious
+    public APIs need clarity
+    function return types matter
+    complex objects would otherwise be inferred unclearly
+
+6. Basic TypeScript types
+  Common ones
+    string
+    number
+    boolean
+    null
+    undefined
+    object
+    array
+    tuple
+    enum
+    any
+    unknown
+    never
+    void
+
+7. any vs unknown
+  `any`
+    disables type safety
+    you can do anything with it
+
+  `unknown`
+    safer than any
+    you must narrow it before using it
+
+  Strong interview answer
+    Prefer `unknown` over `any` when the value shape is not known yet, because it preserves type safety.
+
+8. never
+  `never` represents a value that never occurs.
+
+  Common uses
+    functions that always throw
+    exhaustive switch checking
+
+9. void
+  `void` is used when a function does not return a meaningful value.
+
+10. Union types
+  A union means a value can be one of several types.
+
+  Example idea
+    string | number
+
+11. Intersection types
+  An intersection combines multiple types into one type that must satisfy all parts.
+
+  Example idea
+    User & Timestamped
+
+12. Type narrowing
+  Narrowing means reducing a broad type to a more specific one through checks.
+
+  Common narrowing patterns
+    typeof
+    instanceof
+    in operator
+    custom type guards
+
+13. Type guards
+  Type guards help TypeScript understand a more specific type after a runtime check.
+
+  Strong interview answer
+    Type guards connect runtime checks with compile-time narrowing.
+
+14. Interfaces
+  Interfaces are commonly used to describe object shapes.
+
+  Good use cases
+    API shapes
+    props
+    public contracts
+
+15. type aliases
+  Type aliases are more flexible for unions, intersections, primitives, tuples, and more complex compositions.
+
+16. interface vs type
+  Common safe answer
+    Both are useful.
+    Interfaces are often preferred for object contracts and extension patterns.
+    Type aliases are often preferred for unions, intersections, and more expressive type composition.
+
+  Important point
+    Do not treat one as universally better.
+
+17. Optional properties
+  Optional fields are written with `?`.
+
+  Why they matter
+    They model incomplete or partial data safely.
+
+18. Readonly
+  `readonly` marks properties that should not be reassigned after initialization.
+
+  Why it matters
+    It helps communicate immutability intent and catches accidental mutations.
+
+19. Literal types
+  Literal types let you restrict values very precisely.
+
+  Example idea
+    "loading" | "success" | "error"
+
+  Why this matters
+    Very common in UI states and finite-state modeling.
+
+20. Enums
+  Enums represent named constants.
+
+  Interview-safe answer
+    TypeScript enums exist, but many teams prefer union literal types for simpler and more predictable behavior in frontend code.
+
+21. Generics
+  Generics let you write reusable code that works across types while preserving type information.
+
+  This is one of the most important TypeScript interview topics.
+
+22. Why generics matter
+  Without generics, reusable functions often lose type precision.
+  With generics, you can preserve relationships between input and output types.
+
+23. Example generic thinking
+  A function that returns the same type it receives should preserve that type, not just return `any`.
+
+24. Generic constraints
+  Constraints let you say that a generic must have certain properties or behavior.
+
+  Why this matters
+    It balances flexibility with safety.
+
+25. Utility types
+  Very important ones to know
+    Partial
+    Required
+    Readonly
+    Pick
+    Omit
+    Record
+    Exclude
+    Extract
+    ReturnType
+    Parameters
+
+26. Partial
+  Makes all properties optional.
+  Useful for update operations and form patching.
+
+27. Pick and Omit
+  Pick
+    select a subset of properties
+
+  Omit
+    remove a subset of properties
+
+  These are very commonly asked.
+
+28. Record
+  `Record<K, V>` creates an object type with keys of one type and values of another type.
+
+29. Type assertions
+  Type assertions tell TypeScript how to treat a value.
+
+  Important warning
+    They do not actually validate data at runtime.
+
+30. Non-null assertion
+  The `!` operator tells TypeScript you believe a value is not null or undefined.
+
+  Important warning
+    Use carefully. It can silence useful type safety.
+
+31. Function typing
+  You should know how to type:
+    parameters
+    return values
+    callbacks
+    async functions
+    generic functions
+
+32. Typing async functions
+  Async functions return Promises.
+
+  Interview-safe answer
+    If a function is `async`, its return type is `Promise<T>` even if it looks like it returns `T` directly.
+
+33. TypeScript with arrays and objects
+  Common topics
+    readonly arrays
+    mapped object types
+    arrays of unions vs union of arrays
+
+34. Discriminated unions
+  This is one of the strongest TypeScript topics for interviews.
+
+  A discriminated union uses a shared literal field to help TypeScript narrow safely.
+
+  Example idea
+    status: "idle" | "loading" | "success" | "error"
+
+  Why it matters
+    Very useful for modeling async states and component states safely.
+
+35. Mapped types
+  Mapped types transform one type into another by iterating over keys.
+
+  Interview point
+    Utility types like Partial are built using mapped-type ideas.
+
+36. keyof and indexed access types
+  `keyof`
+    gets the keys of a type
+
+  indexed access
+    gets the type of a property from another type
+
+37. typeof in TypeScript
+  `typeof` can be used at the type level to infer the type of a variable or object.
+
+38. Conditional types
+  Conditional types let you define types that depend on other types.
+
+  This is more advanced, but common in stronger TypeScript interviews.
+
+39. TypeScript does not replace runtime validation
+  This is critical.
+
+  Good answer
+    TypeScript only checks types at compile time. If data comes from an API, user input, or database, runtime validation may still be needed.
+
+40. Common TypeScript interview traps
+  Be careful with these
+    using `any` too easily
+    thinking type assertions validate runtime values
+    confusing interface and type
+    not understanding narrowing
+    weak understanding of generics
+    forgetting async return types are Promises
+
+41. When TypeScript helps the most
+  TypeScript is especially valuable in:
+    medium-to-large codebases
+    team collaboration
+    public APIs and shared contracts
+    refactoring-heavy code
+    UI state modeling
+
+42. When TypeScript can feel heavy
+  It can feel heavy when:
+    over-modeled too early
+    used with unnecessary complexity
+    every small thing gets advanced types without real value
+
+  Strong answer
+    Good TypeScript improves clarity. Over-engineered TypeScript can hurt readability.
+
+43. JavaScript vs TypeScript short comparison
+  JavaScript
+    flexible, dynamic, runtime-checked
+
+  TypeScript
+    adds compile-time type safety and better tooling
+
+44. Short speaking answer for TypeScript
+  "TypeScript is JavaScript with a static type system. Its biggest value is not just catching bugs, but making contracts clearer and refactoring safer, especially in larger codebases. In interviews, I focus on narrowing, unions, generics, utility types, and practical tradeoffs rather than only syntax."
+
+45. Final JavaScript checklist
+  Make sure you can clearly explain:
+    scope
+    closures
+    hoisting
+    temporal dead zone
+    `this`
+    prototypes
+    mutation vs immutability
+    promises
+    async/await
+    microtasks vs macrotasks
+
+46. Final TypeScript checklist
+  Make sure you can clearly explain:
+    why TypeScript exists
+    any vs unknown
+    union vs intersection
+    type narrowing
+    interfaces vs type aliases
+    generics
+    utility types
+    discriminated unions
+    type assertions vs runtime validation
+
+Next doc
+  Doc 4: PostgreSQL and Supabase

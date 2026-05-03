@@ -1,3 +1,5 @@
+// api/generate/[owner]/[repo]
+
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import GeneratorClient from '@/components/GeneratorClient'
