@@ -42,6 +42,7 @@ export default function ChangelogPreview({
   const [original] = useState<ChangelogResult>(() => cloneChangelog(changelog))
   const [editingKey, setEditingKey] = useState<string | null>(null)
   const [isCopying, setIsCopying] = useState(false)
+  const [isDownloading, setIsDownloading] = useState(false)
 
   const updateEntry = (
     category: ChangelogCategoryKey,
@@ -80,13 +81,12 @@ export default function ChangelogPreview({
     setIsCopying(true)
 
     try {
-      const markdown = generateChangelogMarkdown(edited, {
+      const markdown = buildMarkdown({
+        changelog: edited,
         repoName,
         tone,
         generatedAt,
-        commitCount: commits.length,
-        contributors: commits.map((commit) => commit.author),
-        dateRange: getCommitDateRange(commits),
+        commits,
       })
 
       await copyTextToClipboard(markdown)
@@ -99,6 +99,32 @@ export default function ChangelogPreview({
       )
     } finally {
       setIsCopying(false)
+    }
+  }
+
+  const handleDownloadMarkdown = async () => {
+    setIsDownloading(true)
+
+    try {
+      const markdown = buildMarkdown({
+        changelog: edited,
+        repoName,
+        tone,
+        generatedAt,
+        commits,
+      })
+
+      const filename = buildMarkdownFilename(repoName, generatedAt)
+      downloadTextFile(markdown, filename, 'text/markdown;charset=utf-8')
+      toast.success(`Downloaded ${filename}`)
+    } catch (error) {
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : 'Could not download Markdown file'
+      )
+    } finally {
+      setIsDownloading(false)
     }
   }
 
@@ -131,32 +157,61 @@ export default function ChangelogPreview({
           Click any title or description to edit inline
         </p>
 
-        <button
-          onClick={handleCopyMarkdown}
-          disabled={isCopying}
-          className={`inline-flex min-h-9 items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold transition-colors sm:self-auto ${
-            isCopying
-              ? 'cursor-wait border border-[#1e3a2a] text-[#7fc28e] opacity-70'
-              : 'border border-[#238636]/40 bg-[#238636]/15 text-[#CAFFD6] hover:bg-[#238636]/25'
-          }`}
-        >
-          {isCopying ? (
-            <svg className="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-            </svg>
-          ) : (
-            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
-              />
-            </svg>
-          )}
-          {isCopying ? 'Copying...' : 'Copy Markdown'}
-        </button>
+        <div className="flex flex-wrap items-center gap-2 sm:self-auto">
+          <button
+            onClick={handleCopyMarkdown}
+            disabled={isCopying || isDownloading}
+            className={`inline-flex min-h-9 items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold transition-colors ${
+              isCopying || isDownloading
+                ? 'cursor-wait border border-[#1e3a2a] text-[#7fc28e] opacity-70'
+                : 'border border-[#238636]/40 bg-[#238636]/15 text-[#CAFFD6] hover:bg-[#238636]/25'
+            }`}
+          >
+            {isCopying ? (
+              <svg className="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+              </svg>
+            ) : (
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+                />
+              </svg>
+            )}
+            {isCopying ? 'Copying...' : 'Copy Markdown'}
+          </button>
+
+          <button
+            onClick={handleDownloadMarkdown}
+            disabled={isDownloading || isCopying}
+            className={`inline-flex min-h-9 items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold transition-colors ${
+              isDownloading || isCopying
+                ? 'cursor-wait border border-[#1e3a2a] text-[#7fc28e] opacity-70'
+                : 'border border-[#238636]/40 bg-[#238636]/15 text-[#CAFFD6] hover:bg-[#238636]/25'
+            }`}
+          >
+            {isDownloading ? (
+              <svg className="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+              </svg>
+            ) : (
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                />
+              </svg>
+            )}
+            {isDownloading ? 'Downloading...' : 'Download Markdown'}
+          </button>
+        </div>
       </div>
 
       {populatedCategories.map((category) => {
@@ -320,6 +375,53 @@ async function copyTextToClipboard(text: string) {
   } finally {
     document.body.removeChild(textArea)
   }
+}
+
+function buildMarkdown({
+  changelog,
+  repoName,
+  tone,
+  generatedAt,
+  commits,
+}: {
+  changelog: ChangelogResult
+  repoName: string
+  tone: ChangelogTone
+  generatedAt: string | null
+  commits: CommitData[]
+}) {
+  return generateChangelogMarkdown(changelog, {
+    repoName,
+    tone,
+    generatedAt,
+    commitCount: commits.length,
+    contributors: commits.map((commit) => commit.author),
+    dateRange: getCommitDateRange(commits),
+  })
+}
+
+function downloadTextFile(content: string, filename: string, mimeType: string) {
+  const blob = new Blob([content], { type: mimeType })
+  const objectUrl = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+
+  link.href = objectUrl
+  link.download = filename
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+  URL.revokeObjectURL(objectUrl)
+}
+
+function buildMarkdownFilename(repoName: string, generatedAt: string | null) {
+  const repoSegment = repoName.split('/').pop() || 'repo'
+  const safeRepo = repoSegment.replace(/[^a-z0-9-_]+/gi, '-').replace(/-+/g, '-')
+  const generatedDate = generatedAt ? new Date(generatedAt) : new Date()
+  const datePart = Number.isNaN(generatedDate.getTime())
+    ? new Date().toISOString().slice(0, 10)
+    : generatedDate.toISOString().slice(0, 10)
+
+  return `CHANGELOG-${safeRepo}-${datePart}.md`
 }
 
 function getCommitDateRange(commits: CommitData[]) {

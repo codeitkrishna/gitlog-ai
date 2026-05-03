@@ -93,8 +93,9 @@ export default function DashboardClient() {
   const hasMore = displayCount < filteredRepos.length;
 
   return (
-    <div className="min-h-screen bg-[#0d1317] text-[#caffd6] bg-[url('/images/heroBg.svg')] bg-no-repeat bg-cover">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 pt-24 sm:pt-28 pb-10 sm:pb-12">
+    <div className="page-pattern-shell text-[#caffd6]">
+      <div aria-hidden className="page-pattern-backdrop" />
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 pt-24 sm:pt-28 pb-10 sm:pb-12">
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-2xl sm:text-3xl font-bold text-[#22c55e] mb-2">

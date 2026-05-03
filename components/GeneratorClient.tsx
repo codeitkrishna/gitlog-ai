@@ -147,9 +147,11 @@ export default function GeneratorClient({ owner, repo }: GeneratorClientProps) {
   };
 
   return (
-    <div className="min-h-screen bg-[#0d1317] bg-[url('/images/heroBg.svg')] bg-cover bg-no-repeat text-[#CAFFD6]">
+    <div className="page-pattern-shell text-[#CAFFD6]">
+      <div aria-hidden className="page-pattern-backdrop" />
+
       {/* Page Header */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 sm:pt-24 pb-6">
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 sm:pt-24 pb-6">
         <div className="flex items-start sm:items-center gap-3">
           <div className="w-8 h-8 rounded-md bg-[#238636] flex items-center justify-center shrink-0">
             <svg
@@ -172,7 +174,7 @@ export default function GeneratorClient({ owner, repo }: GeneratorClientProps) {
       </div>
 
       {/* Main Grid */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* ── Left Column ── */}
           <div className="lg:col-span-1 space-y-4">
@@ -784,25 +786,6 @@ export default function GeneratorClient({ owner, repo }: GeneratorClientProps) {
                           : "Generate Changelog"}
                       </>
                     )}
-                  </button>
-                  <button
-                    disabled
-                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-[#7fc28e] border border-[#1e3a2a] rounded-lg opacity-40 cursor-not-allowed"
-                  >
-                    <svg
-                      className="w-3.5 h-3.5"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-                      />
-                    </svg>
-                    Download
                   </button>
                   <button
                     disabled
