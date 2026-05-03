@@ -1,15 +1,17 @@
+// app/api/repos/route.ts
+
 import { createClient } from '@/lib/supabase/server'
 import { getUserRepositories } from '@/lib/github'
 import { NextResponse } from 'next/server'
 
 export async function GET() {
   try {
-    const supabase = await createClient()
+    const supabase = await createClient();
     
     const {
       data: { user },
       error: userError,
-    } = await supabase.auth.getUser()
+    } = await supabase.auth.getUser();
 
     if (userError || !user) {
       return NextResponse.json(

@@ -1,3 +1,4 @@
+// components/GeneratorClient.tsx
 "use client";
 
 import { useState } from "react";
@@ -52,6 +53,7 @@ export default function GeneratorClient({ owner, repo }: GeneratorClientProps) {
     rangeMode === "date"
       ? dateRange.from !== null && dateRange.to !== null
       : fromTag !== null && toTag !== null;
+      
   const canGenerate = fetchStatus === "success" && commits.length > 0;
 
   const handleFetch = async () => {
@@ -128,7 +130,9 @@ export default function GeneratorClient({ owner, repo }: GeneratorClientProps) {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || data.error || "Failed to generate changelog");
+        throw new Error(
+          data.message || data.error || "Failed to generate changelog",
+        );
       }
 
       setChangelog(data.changelog);
@@ -205,8 +209,8 @@ export default function GeneratorClient({ owner, repo }: GeneratorClientProps) {
                   )}
                   <svg
                     className={`w-4 h-4 text-[#7fc28e] transition-transform duration-200 ${
-  activePanel === "config" ? "rotate-180" : ""
-}`}
+                      activePanel === "config" ? "rotate-180" : ""
+                    }`}
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -223,9 +227,13 @@ export default function GeneratorClient({ owner, repo }: GeneratorClientProps) {
 
               {/* Collapsible content */}
               {activePanel === "config" && (
-                <div className={`transition-all duration-300 ease-in-out overflow-hidden ${
-  activePanel === "config" ? "max-h-[2000px] opacity-100" : "max-h-0 opacity-0"
-}`}>
+                <div
+                  className={`transition-all duration-300 ease-in-out overflow-hidden ${
+                    activePanel === "config"
+                      ? "max-h-500 opacity-100"
+                      : "max-h-0 opacity-0"
+                  }`}
+                >
                   <div className="px-5 pb-5 space-y-5">
                     <div className="h-px bg-[#1e3a2a]" />
 
@@ -324,7 +332,9 @@ export default function GeneratorClient({ owner, repo }: GeneratorClientProps) {
                               name="tone"
                               value={option.value}
                               checked={tone === option.value}
-                              onChange={(e) => setTone(e.target.value as ChangelogTone)}
+                              onChange={(e) =>
+                                setTone(e.target.value as ChangelogTone)
+                              }
                               className="sr-only"
                             />
                             <div>
@@ -349,66 +359,112 @@ export default function GeneratorClient({ owner, repo }: GeneratorClientProps) {
                       </div>
                     )}
                     {/* Filters */}
-<div>
-  <label className="block text-xs font-medium text-[#7fc28e] mb-3 uppercase tracking-wide">
-    Filters
-  </label>
-  <div className="space-y-2">
-    {/* Exclude merge commits */}
-    <label className="flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer bg-[#0d1317] border border-[#1e3a2a] hover:border-[#7fc28e] transition-colors">
-      <div
-        onClick={() => setExcludeMerge(!excludeMerge)}
-        className={`w-4 h-4 rounded border-2 flex items-center justify-center shrink-0 cursor-pointer transition-colors ${
-          excludeMerge ? "bg-[#238636] border-[#22c55e]" : "border-[#7fc28e]"
-        }`}
-      >
-        {excludeMerge && (
-          <svg className="w-2.5 h-2.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-          </svg>
-        )}
-      </div>
-      <input type="checkbox" checked={excludeMerge} onChange={(e) => setExcludeMerge(e.target.checked)} className="sr-only" />
-      <div>
-        <div className="text-sm text-[#CAFFD6]">Exclude merge commits</div>
-        <div className="text-xs text-[#7fc28e]">Remove &quot;Merge branch...&quot; commits</div>
-      </div>
-    </label>
+                    <div>
+                      <label className="block text-xs font-medium text-[#7fc28e] mb-3 uppercase tracking-wide">
+                        Filters
+                      </label>
+                      <div className="space-y-2">
+                        {/* Exclude merge commits */}
+                        <label className="flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer bg-[#0d1317] border border-[#1e3a2a] hover:border-[#7fc28e] transition-colors">
+                          <div
+                            onClick={() => setExcludeMerge(!excludeMerge)}
+                            className={`w-4 h-4 rounded border-2 flex items-center justify-center shrink-0 cursor-pointer transition-colors ${
+                              excludeMerge
+                                ? "bg-[#238636] border-[#22c55e]"
+                                : "border-[#7fc28e]"
+                            }`}
+                          >
+                            {excludeMerge && (
+                              <svg
+                                className="w-2.5 h-2.5 text-white"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={3}
+                                  d="M5 13l4 4L19 7"
+                                />
+                              </svg>
+                            )}
+                          </div>
+                          <input
+                            type="checkbox"
+                            checked={excludeMerge}
+                            onChange={(e) => setExcludeMerge(e.target.checked)}
+                            className="sr-only"
+                          />
+                          <div>
+                            <div className="text-sm text-[#CAFFD6]">
+                              Exclude merge commits
+                            </div>
+                            <div className="text-xs text-[#7fc28e]">
+                              Remove &quot;Merge branch...&quot; commits
+                            </div>
+                          </div>
+                        </label>
 
-    {/* Exclude dependency updates */}
-    <label className="flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer bg-[#0d1117] border border-[#1e3a2a] hover:border-[#7fc28e] transition-colors">
-      <div
-        onClick={() => setExcludeDeps(!excludeDeps)}
-        className={`w-4 h-4 rounded border-2 flex items-center justify-center shrink-0 cursor-pointer transition-colors ${
-          excludeDeps ? "bg-[#238636] border-[#22c55e]" : "border-[#7fc28e]"
-        }`}
-      >
-        {excludeDeps && (
-          <svg className="w-2.5 h-2.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-          </svg>
-        )}
-      </div>
-      <input type="checkbox" checked={excludeDeps} onChange={(e) => setExcludeDeps(e.target.checked)} className="sr-only" />
-      <div>
-        <div className="text-sm text-[#CAFFD6]">Exclude dependency updates</div>
-        <div className="text-xs text-[#7fc28e]">Remove Dependabot and bump commits</div>
-      </div>
-    </label>
+                        {/* Exclude dependency updates */}
+                        <label className="flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer bg-[#0d1117] border border-[#1e3a2a] hover:border-[#7fc28e] transition-colors">
+                          <div
+                            onClick={() => setExcludeDeps(!excludeDeps)}
+                            className={`w-4 h-4 rounded border-2 flex items-center justify-center shrink-0 cursor-pointer transition-colors ${
+                              excludeDeps
+                                ? "bg-[#238636] border-[#22c55e]"
+                                : "border-[#7fc28e]"
+                            }`}
+                          >
+                            {excludeDeps && (
+                              <svg
+                                className="w-2.5 h-2.5 text-white"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={3}
+                                  d="M5 13l4 4L19 7"
+                                />
+                              </svg>
+                            )}
+                          </div>
+                          <input
+                            type="checkbox"
+                            checked={excludeDeps}
+                            onChange={(e) => setExcludeDeps(e.target.checked)}
+                            className="sr-only"
+                          />
+                          <div>
+                            <div className="text-sm text-[#CAFFD6]">
+                              Exclude dependency updates
+                            </div>
+                            <div className="text-xs text-[#7fc28e]">
+                              Remove Dependabot and bump commits
+                            </div>
+                          </div>
+                        </label>
 
-    {/* Exclude containing */}
-    <div className="px-3 py-2.5 rounded-lg bg-[#0d1117] border border-[#1e3a2a]">
-      <div className="text-sm text-[#CAFFD6] mb-1.5">Exclude commits containing</div>
-      <input
-        type="text"
-        value={excludeContaining}
-        onChange={(e) => setExcludeContaining(e.target.value)}
-        placeholder='e.g. "typo", "wip", "test"'
-        className="w-full bg-[#121f23] border border-[#1e3a2a] rounded-md px-2.5 py-1.5 text-xs text-[#CAFFD6] placeholder-[#7fc28e]/50 focus:outline-none focus:border-[#22c55e] transition-colors"
-      />
-    </div>
-  </div>
-</div>
+                        {/* Exclude containing */}
+                        <div className="px-3 py-2.5 rounded-lg bg-[#0d1117] border border-[#1e3a2a]">
+                          <div className="text-sm text-[#CAFFD6] mb-1.5">
+                            Exclude commits containing
+                          </div>
+                          <input
+                            type="text"
+                            value={excludeContaining}
+                            onChange={(e) =>
+                              setExcludeContaining(e.target.value)
+                            }
+                            placeholder='e.g. "typo", "wip", "test"'
+                            className="w-full bg-[#121f23] border border-[#1e3a2a] rounded-md px-2.5 py-1.5 text-xs text-[#CAFFD6] placeholder-[#7fc28e]/50 focus:outline-none focus:border-[#22c55e] transition-colors"
+                          />
+                        </div>
+                      </div>
+                    </div>
                     {/* Fetch Button */}
                     <button
                       onClick={handleFetch}
@@ -504,8 +560,8 @@ export default function GeneratorClient({ owner, repo }: GeneratorClientProps) {
                 </div>
                 <svg
                   className={`w-4 h-4 text-[#7fc28e] transition-transform duration-200 ${
-  activePanel === "commits" ? "rotate-180" : ""
-}`}
+                    activePanel === "commits" ? "rotate-180" : ""
+                  }`}
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -521,76 +577,133 @@ export default function GeneratorClient({ owner, repo }: GeneratorClientProps) {
 
               {/* Collapsible commits content */}
               {activePanel === "commits" && (
-                <div className={`transition-all duration-300 ease-in-out overflow-hidden ${
-  activePanel === "commits" ? "max-h-[2000px] opacity-100" : "max-h-0 opacity-0"
-}`}>
-  {fetchStatus === "idle" && (
-    <div className="px-4 pb-5">
-      <p className="text-xs text-[#7fc28e]">Select a range and click Fetch Commits</p>
-    </div>
-  )}
-  {fetchStatus === "loading" && (
-    <div className="px-4 py-6 flex items-center justify-center gap-2">
-      <svg className="w-4 h-4 animate-spin text-[#22c55e]" fill="none" viewBox="0 0 24 24">
-        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-      </svg>
-      <span className="text-sm text-[#7fc28e]">Fetching commits...</span>
-    </div>
-  )}
-  {fetchStatus === "error" && (
-    <p className="text-xs text-red-400 px-4 pb-4">Failed to load commits. Try again.</p>
-  )}
-  {/* Stats bar — Task 5.11 */}
-{fetchStatus === "success" && stats && commits.length > 0 && (
-  <div className="grid grid-cols-2 gap-2 px-4 py-3 border-b border-[#1e3a2a]">
-    <div className="bg-[#0d1317] rounded-lg px-3 py-2">
-      <div className="text-xs text-[#7fc28e] mb-0.5">Commits</div>
-      <div className="text-sm font-bold text-[#22c55e]">{stats.total}</div>
-    </div>
-    <div className="bg-[#0d1317] rounded-lg px-3 py-2">
-      <div className="text-xs text-[#7fc28e] mb-0.5">Contributors</div>
-      <div className="text-sm font-bold text-[#22c55e]">{stats.contributors}</div>
-    </div>
-    <div className="bg-[#0d1317] rounded-lg px-3 py-2">
-      <div className="text-xs text-[#7fc28e] mb-0.5">Files Changed</div>
-      <div className="text-sm font-bold text-[#22c55e]">{stats.totalFilesChanged}</div>
-    </div>
-    <div className="bg-[#0d1317] rounded-lg px-3 py-2">
-      <div className="text-xs text-[#7fc28e] mb-0.5">Lines</div>
-      <div className="text-sm font-bold">
-        <span className="text-[#22c55e]">+{stats.totalAdditions}</span>
-        <span className="text-red-400 ml-1">-{stats.totalDeletions}</span>
-      </div>
-    </div>
-    {stats.filteredOut > 0 && (
-      <div className="col-span-2 bg-[#0d1117] rounded-lg px-3 py-2">
-        <div className="text-xs text-[#7fc28e]">
-          {stats.filteredOut} commits filtered out by your filters
-        </div>
-      </div>
-    )}
-  </div>
-)}
+                <div
+                  className={`transition-all duration-300 ease-in-out overflow-hidden ${
+                    activePanel === "commits"
+                      ? "max-h-[2000px] opacity-100"
+                      : "max-h-0 opacity-0"
+                  }`}
+                >
+                  {fetchStatus === "idle" && (
+                    <div className="px-4 pb-5">
+                      <p className="text-xs text-[#7fc28e]">
+                        Select a range and click Fetch Commits
+                      </p>
+                    </div>
+                  )}
+                  {fetchStatus === "loading" && (
+                    <div className="px-4 py-6 flex items-center justify-center gap-2">
+                      <svg
+                        className="w-4 h-4 animate-spin text-[#22c55e]"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        />
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                        />
+                      </svg>
+                      <span className="text-sm text-[#7fc28e]">
+                        Fetching commits...
+                      </span>
+                    </div>
+                  )}
+                  {fetchStatus === "error" && (
+                    <p className="text-xs text-red-400 px-4 pb-4">
+                      Failed to load commits. Try again.
+                    </p>
+                  )}
+                  {/* Stats bar — Task 5.11 */}
+                  {fetchStatus === "success" && stats && commits.length > 0 && (
+                    <div className="grid grid-cols-2 gap-2 px-4 py-3 border-b border-[#1e3a2a]">
+                      <div className="bg-[#0d1317] rounded-lg px-3 py-2">
+                        <div className="text-xs text-[#7fc28e] mb-0.5">
+                          Commits
+                        </div>
+                        <div className="text-sm font-bold text-[#22c55e]">
+                          {stats.total}
+                        </div>
+                      </div>
+                      <div className="bg-[#0d1317] rounded-lg px-3 py-2">
+                        <div className="text-xs text-[#7fc28e] mb-0.5">
+                          Contributors
+                        </div>
+                        <div className="text-sm font-bold text-[#22c55e]">
+                          {stats.contributors}
+                        </div>
+                      </div>
+                      <div className="bg-[#0d1317] rounded-lg px-3 py-2">
+                        <div className="text-xs text-[#7fc28e] mb-0.5">
+                          Files Changed
+                        </div>
+                        <div className="text-sm font-bold text-[#22c55e]">
+                          {stats.totalFilesChanged}
+                        </div>
+                      </div>
+                      <div className="bg-[#0d1317] rounded-lg px-3 py-2">
+                        <div className="text-xs text-[#7fc28e] mb-0.5">
+                          Lines
+                        </div>
+                        <div className="text-sm font-bold">
+                          <span className="text-[#22c55e]">
+                            +{stats.totalAdditions}
+                          </span>
+                          <span className="text-red-400 ml-1">
+                            -{stats.totalDeletions}
+                          </span>
+                        </div>
+                      </div>
+                      {stats.filteredOut > 0 && (
+                        <div className="col-span-2 bg-[#0d1117] rounded-lg px-3 py-2">
+                          <div className="text-xs text-[#7fc28e]">
+                            {stats.filteredOut} commits filtered out by your
+                            filters
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
 
-{/* Edge case: no commits found */}
-{fetchStatus === "success" && commits.length === 0 && (
-  <div className="px-4 py-8 text-center">
-    <div className="w-10 h-10 rounded-full bg-[#0d1117] border border-[#1e3a2a] flex items-center justify-center mx-auto mb-3">
-      <svg className="w-5 h-5 text-[#7fc28e]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-      </svg>
-    </div>
-    <p className="text-sm font-medium text-[#CAFFD6] mb-1">No commits found</p>
-    <p className="text-xs text-[#7fc28e] max-w-xs mx-auto">
-      {emptyMessage || "Try a different date range or adjust your filters."}
-    </p>
-  </div>
-)}
-  {fetchStatus === "success" && (
-    <CommitList commits={commits} wasTruncated={wasTruncated} />
-  )}
-</div>
+                  {/* Edge case: no commits found */}
+                  {fetchStatus === "success" && commits.length === 0 && (
+                    <div className="px-4 py-8 text-center">
+                      <div className="w-10 h-10 rounded-full bg-[#0d1117] border border-[#1e3a2a] flex items-center justify-center mx-auto mb-3">
+                        <svg
+                          className="w-5 h-5 text-[#7fc28e]"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                          />
+                        </svg>
+                      </div>
+                      <p className="text-sm font-medium text-[#CAFFD6] mb-1">
+                        No commits found
+                      </p>
+                      <p className="text-xs text-[#7fc28e] max-w-xs mx-auto">
+                        {emptyMessage ||
+                          "Try a different date range or adjust your filters."}
+                      </p>
+                    </div>
+                  )}
+                  {fetchStatus === "success" && (
+                    <CommitList commits={commits} wasTruncated={wasTruncated} />
+                  )}
+                </div>
               )}
             </div>
           </div>
@@ -666,28 +779,11 @@ export default function GeneratorClient({ owner, repo }: GeneratorClientProps) {
                             d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
                           />
                         </svg>
-                        {generateStatus === "success" ? "Regenerate" : "Generate Changelog"}
+                        {generateStatus === "success"
+                          ? "Regenerate"
+                          : "Generate Changelog"}
                       </>
                     )}
-                  </button>
-                  <button
-                    disabled
-                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-[#7fc28e] border border-[#1e3a2a] rounded-lg opacity-40 cursor-not-allowed"
-                  >
-                    <svg
-                      className="w-3.5 h-3.5"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
-                      />
-                    </svg>
-                    Copy
                   </button>
                   <button
                     disabled
@@ -758,7 +854,8 @@ export default function GeneratorClient({ owner, repo }: GeneratorClientProps) {
                       Analyzing your commits
                     </h3>
                     <p className="text-sm text-[#7fc28e] max-w-xs mx-auto">
-                      AI is grouping changes and rewriting them into a clean changelog.
+                      AI is grouping changes and rewriting them into a clean
+                      changelog.
                     </p>
                   </div>
                 </div>
@@ -790,7 +887,9 @@ export default function GeneratorClient({ owner, repo }: GeneratorClientProps) {
                 <>
                   <div className="px-4 sm:px-6 py-3 border-b border-[#1e3a2a] bg-[#0d1317]/40">
                     <div className="flex flex-wrap items-center gap-2 text-xs text-[#7fc28e]">
-                      <span className="text-[#22c55e] font-medium">{owner}/{repo}</span>
+                      <span className="text-[#22c55e] font-medium">
+                        {owner}/{repo}
+                      </span>
                       <span>•</span>
                       <span>{tone} tone</span>
                       <span>•</span>
@@ -798,14 +897,24 @@ export default function GeneratorClient({ owner, repo }: GeneratorClientProps) {
                       {generatedAt && (
                         <>
                           <span>•</span>
-                          <span>Generated {new Date(generatedAt).toLocaleTimeString()}</span>
+                          <span>
+                            Generated{" "}
+                            {new Date(generatedAt).toLocaleTimeString()}
+                          </span>
                         </>
                       )}
                     </div>
                   </div>
                   <ChangelogPreview
-                    key={generatedAt ?? `${owner}/${repo}-${tone}-${commits.length}`}
+                    key={
+                      generatedAt ??
+                      `${owner}/${repo}-${tone}-${commits.length}`
+                    }
                     changelog={changelog}
+                    repoName={`${owner}/${repo}`}
+                    tone={tone}
+                    commits={commits}
+                    generatedAt={generatedAt}
                   />
                 </>
               ) : (

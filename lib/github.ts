@@ -1,3 +1,5 @@
+// lib/github.ts
+
 import { Octokit } from '@octokit/rest'
 import type { GitHubRepository, Repository } from '@/types/github'
 
@@ -5,6 +7,8 @@ import type { GitHubRepository, Repository } from '@/types/github'
  * Create authenticated Octokit instance
  * @param accessToken - GitHub access token from user session
  */
+
+
 export function createGitHubClient(accessToken: string) {
   return new Octokit({
     auth: accessToken,
@@ -16,6 +20,8 @@ export function createGitHubClient(accessToken: string) {
  * @param accessToken - GitHub access token
  * @returns Array of repositories
  */
+
+
 export async function getUserRepositories(
   accessToken: string
 ): Promise<Repository[]> {
@@ -32,7 +38,7 @@ export async function getUserRepositories(
 
     console.log('Successfully fetched', data.length, 'repos')
 
-    const repos: Repository[] = data.map((repo) => ({
+    const repos: Repository[] = data.map((repo : GitHubRepository) => ({
       id: repo.id,
       name: repo.name,
       fullName: repo.full_name,
@@ -42,7 +48,7 @@ export async function getUserRepositories(
       stars: repo.stargazers_count,
       updatedAt: repo.updated_at || repo.created_at,
       isPrivate: repo.private,
-      url: repo.html_url,
+      url: repo.html_url
     }))
 
     return repos
@@ -59,6 +65,8 @@ export async function getUserRepositories(
  * @param owner - Repository owner
  * @param repo - Repository name
  */
+
+
 export async function getRepository(
   accessToken: string,
   owner: string,

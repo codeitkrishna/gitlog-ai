@@ -1,4 +1,5 @@
 //app/api/generate/route.ts
+
 import { NextResponse } from 'next/server'
 import { generateWithAI } from '@/lib/ai'
 import { parseChangelogResponse } from '@/lib/ai-parser'
