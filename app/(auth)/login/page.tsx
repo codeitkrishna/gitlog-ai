@@ -30,11 +30,13 @@ export default function LoginPage() {
 
   return (
     <div
-      className="min-h-screen flex items-center justify-center bg-[#0d1317] bg-[url('/images/heroBg.svg')] bg-cover bg-no-repeat px-4 pt-24 pb-8 sm:px-6"
+      className="page-pattern-shell flex items-center justify-center px-4 pt-24 pb-8 sm:px-6"
     >
+      <div aria-hidden className="page-pattern-backdrop" />
+
       {/* Top green radial glow */}
       <div
-        className="absolute top-0 left-1/2 -translate-x-1/2 w-[360px] h-[180px] sm:w-[600px] sm:h-[300px] pointer-events-none"
+        className="absolute top-0 left-1/2 z-0 -translate-x-1/2 w-[360px] h-[180px] sm:w-[600px] sm:h-[300px] pointer-events-none"
         style={{
           background:
             'radial-gradient(ellipse at center top, rgba(35,134,54,0.15) 0%, transparent 70%)',
