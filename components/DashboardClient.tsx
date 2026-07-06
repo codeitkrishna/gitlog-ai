@@ -1,7 +1,7 @@
-// components/DashboardClient/page.tsx
+// components/DashboardClient.tsx
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Repository } from "@/types/github";
 import RepoCard from "./RepoCard";
 import RepoCardSkeleton from "./RepoCardSkeleton";
@@ -10,10 +10,10 @@ type SortOption = "updated" | "name" | "stars";
 
 export default function DashboardClient() {
   const [repos, setRepos] = useState<Repository[]>([]);
-  const [filteredRepos, setFilteredRepos] = useState<Repository[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedQuery, setDebouncedQuery] = useState("");
   const [sortBy, setSortBy] = useState<SortOption>("updated");
   const [displayCount, setDisplayCount] = useState(12);
 
@@ -21,17 +21,11 @@ export default function DashboardClient() {
     fetchRepos();
   }, []);
 
-  // useEffect(() => {
-  //   filterAndSortRepos();
-  // }, [searchQuery, sortBy, repos,]);
-
+  // Debounce the search term so filtering isn't recomputed on every keystroke
   useEffect(() => {
-  const timeout = setTimeout(() => {
-    filterAndSortRepos();
-  }, 300);
-
-  return () => clearTimeout(timeout);
-}, [searchQuery, sortBy, repos]);
+    const timeout = setTimeout(() => setDebouncedQuery(searchQuery), 300);
+    return () => clearTimeout(timeout);
+  }, [searchQuery]);
 
   const fetchRepos = async () => {
     try {
@@ -53,21 +47,22 @@ export default function DashboardClient() {
     }
   };
 
-  const filterAndSortRepos = () => {
-    let result = [...repos];
+  // Derived: filtered + sorted list. Recomputes only when inputs change,
+  // so the initial list renders synchronously (no empty-state flash).
+  const filteredRepos = useMemo(() => {
+    const query = debouncedQuery.trim().toLowerCase();
+    let result = repos;
 
-    // Filter by search query
-    if (searchQuery.trim() !== "") {
+    if (query !== "") {
       result = result.filter(
         (repo) =>
-          repo.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          repo.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          repo.language?.toLowerCase().includes(searchQuery.toLowerCase()),
+          repo.name.toLowerCase().includes(query) ||
+          repo.description?.toLowerCase().includes(query) ||
+          repo.language?.toLowerCase().includes(query),
       );
     }
 
-    // Sort
-    result.sort((a, b) => {
+    return [...result].sort((a, b) => {
       switch (sortBy) {
         case "name":
           return a.name.localeCompare(b.name);
@@ -81,9 +76,7 @@ export default function DashboardClient() {
           );
       }
     });
-
-    setFilteredRepos(result);
-  };
+  }, [repos, debouncedQuery, sortBy]);
 
   const loadMore = () => {
     setDisplayCount((prev) => prev + 12);

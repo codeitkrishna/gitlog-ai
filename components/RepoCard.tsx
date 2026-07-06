@@ -28,13 +28,13 @@ export default function RepoCard({ repo }: RepoCardProps) {
       Swift: "#ffac45",
       Kotlin: "#A97BFF",
     };
-    return colors[language || ""] || "#8b949e";
+    return colors[language || ""] || "#7fc28e";
   };
 
   return (
     <div
       onClick={handleClick}
-      className="bg-[#121F23] border border-[#30363d] rounded-xl p-4 sm:p-5 hover:border-[#22c55e] hover:shadow-lg transition-all cursor-pointer group opacity-85 h-full"
+      className="bg-[#121F23] border border-[#1e3a2a] rounded-xl p-4 sm:p-5 hover:border-[#22c55e] hover:shadow-lg transition-all cursor-pointer group opacity-85 h-full"
     >
       {/* Header */}
       <div className="flex items-start justify-between gap-3 mb-3">
@@ -51,7 +51,7 @@ export default function RepoCard({ repo }: RepoCardProps) {
           </h3>
         </div>
         {repo.isPrivate && (
-          <span className="px-2 py-1 text-[10px] sm:text-xs bg-[#194f45] text-[#CAFFD6] rounded border border-[#30363d] shrink-0">
+          <span className="px-2 py-1 text-[10px] sm:text-xs bg-[#194f45] text-[#CAFFD6] rounded border border-[#1e3a2a] shrink-0">
             PRIVATE
           </span>
         )}
