@@ -154,9 +154,9 @@ export default function DashboardClient() {
         {/* Error State */}
         {error && (
           <div className="text-center py-12">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-[#da3633]/10 mb-4">
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-red-500/10 mb-4">
               <svg
-                className="w-8 h-8 text-[#da3633]"
+                className="w-8 h-8 text-red-400"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -169,7 +169,7 @@ export default function DashboardClient() {
                 />
               </svg>
             </div>
-            <h3 className="text-xl font-semibold text-[#caffd6]] mb-2">
+            <h3 className="text-xl font-semibold text-[#CAFFD6] mb-2">
               Failed to load repositories
             </h3>
             <p className="text-[#caffd6] mb-6">{error}</p>
@@ -187,7 +187,7 @@ export default function DashboardClient() {
           <div className="text-center py-12 border-2 border-dashed  rounded-lg">
             <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-[#121F23] mb-4">
               <svg
-                className="w-8 h-8 text-[#3fb950]"
+                className="w-8 h-8 text-[#22c55e]"
                 fill="currentColor"
                 viewBox="0 0 24 24"
               >
@@ -206,7 +206,7 @@ export default function DashboardClient() {
               {searchQuery && (
                 <button
                   onClick={() => setSearchQuery("")}
-                  className="px-6 py-2 bg-[#121F23] hover:bg-[#1f4448] text-[#7fc28e] border border-[#30363d] rounded-lg transition-colors"
+                  className="px-6 py-2 bg-[#121F23] hover:bg-[#1e3a2a] text-[#7fc28e] border border-[#1e3a2a] rounded-lg transition-colors"
                 >
                   Clear Search
                 </button>

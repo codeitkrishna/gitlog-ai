@@ -84,6 +84,7 @@ export default function UserMenu({ user }: { user: User }) {
               </div>
             </Link>
 
+            {/* Future dev — routes not built yet. Re-enable once /generator and /history exist.
             <Link
               href="/generator"
               className="block px-4 py-2 text-sm text-[#CAFFD6] hover:bg-[#0d1317] transition-colors"
@@ -109,6 +110,7 @@ export default function UserMenu({ user }: { user: User }) {
                 History
               </div>
             </Link>
+            */}
 
             <div className="border-t border-[#1e3a2a] mt-2 pt-2">
               <button

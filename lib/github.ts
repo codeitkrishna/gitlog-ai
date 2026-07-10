@@ -28,15 +28,11 @@ export async function getUserRepositories(
   const octokit = createGitHubClient(accessToken)
 
   try {
-    console.log('Fetching repos with token:', accessToken.substring(0, 10) + '...')
-    
     const { data } = await octokit.repos.listForAuthenticatedUser({
       per_page: 100,
       sort: 'updated',
       direction: 'desc',
     })
-
-    console.log('Successfully fetched', data.length, 'repos')
 
     const repos: Repository[] = data.map((repo : GitHubRepository) => ({
       id: repo.id,
@@ -53,8 +49,7 @@ export async function getUserRepositories(
 
     return repos
   } catch (error) {
-    console.error('GitHub API Error:', error)
-    console.error('Error details:', JSON.stringify(error, null, 2))
+    console.error('GitHub API Error:', error instanceof Error ? error.message : error)
     throw new Error('Failed to fetch repositories from GitHub')
   }
 }

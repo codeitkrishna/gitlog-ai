@@ -29,7 +29,7 @@ export function buildChangelogPrompt(
 ): string {
   const MAX_COMMITS_FOR_AI = 100
   const commitsToAnalyse = commits.slice(0, MAX_COMMITS_FOR_AI)
-  const commitList = commitsToAnalyse  // ← changed
+  const commitList = commitsToAnalyse
     .map(
       (c, i) =>
         `${i + 1}. [${c.shortSha}] ${c.message.split("\n")[0]}
