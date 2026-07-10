@@ -1,7 +1,7 @@
-// components/DashboardClient/page.tsx
+// components/DashboardClient.tsx
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Repository } from "@/types/github";
 import RepoCard from "./RepoCard";
 import RepoCardSkeleton from "./RepoCardSkeleton";
@@ -10,10 +10,10 @@ type SortOption = "updated" | "name" | "stars";
 
 export default function DashboardClient() {
   const [repos, setRepos] = useState<Repository[]>([]);
-  const [filteredRepos, setFilteredRepos] = useState<Repository[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedQuery, setDebouncedQuery] = useState("");
   const [sortBy, setSortBy] = useState<SortOption>("updated");
   const [displayCount, setDisplayCount] = useState(12);
 
@@ -21,17 +21,11 @@ export default function DashboardClient() {
     fetchRepos();
   }, []);
 
-  // useEffect(() => {
-  //   filterAndSortRepos();
-  // }, [searchQuery, sortBy, repos,]);
-
+  // Debounce the search term so filtering isn't recomputed on every keystroke
   useEffect(() => {
-  const timeout = setTimeout(() => {
-    filterAndSortRepos();
-  }, 300);
-
-  return () => clearTimeout(timeout);
-}, [searchQuery, sortBy, repos]);
+    const timeout = setTimeout(() => setDebouncedQuery(searchQuery), 300);
+    return () => clearTimeout(timeout);
+  }, [searchQuery]);
 
   const fetchRepos = async () => {
     try {
@@ -53,21 +47,22 @@ export default function DashboardClient() {
     }
   };
 
-  const filterAndSortRepos = () => {
-    let result = [...repos];
+  // Derived: filtered + sorted list. Recomputes only when inputs change,
+  // so the initial list renders synchronously (no empty-state flash).
+  const filteredRepos = useMemo(() => {
+    const query = debouncedQuery.trim().toLowerCase();
+    let result = repos;
 
-    // Filter by search query
-    if (searchQuery.trim() !== "") {
+    if (query !== "") {
       result = result.filter(
         (repo) =>
-          repo.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          repo.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          repo.language?.toLowerCase().includes(searchQuery.toLowerCase()),
+          repo.name.toLowerCase().includes(query) ||
+          repo.description?.toLowerCase().includes(query) ||
+          repo.language?.toLowerCase().includes(query),
       );
     }
 
-    // Sort
-    result.sort((a, b) => {
+    return [...result].sort((a, b) => {
       switch (sortBy) {
         case "name":
           return a.name.localeCompare(b.name);
@@ -81,9 +76,7 @@ export default function DashboardClient() {
           );
       }
     });
-
-    setFilteredRepos(result);
-  };
+  }, [repos, debouncedQuery, sortBy]);
 
   const loadMore = () => {
     setDisplayCount((prev) => prev + 12);
@@ -161,9 +154,9 @@ export default function DashboardClient() {
         {/* Error State */}
         {error && (
           <div className="text-center py-12">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-[#da3633]/10 mb-4">
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-red-500/10 mb-4">
               <svg
-                className="w-8 h-8 text-[#da3633]"
+                className="w-8 h-8 text-red-400"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -176,7 +169,7 @@ export default function DashboardClient() {
                 />
               </svg>
             </div>
-            <h3 className="text-xl font-semibold text-[#caffd6]] mb-2">
+            <h3 className="text-xl font-semibold text-[#CAFFD6] mb-2">
               Failed to load repositories
             </h3>
             <p className="text-[#caffd6] mb-6">{error}</p>
@@ -194,7 +187,7 @@ export default function DashboardClient() {
           <div className="text-center py-12 border-2 border-dashed  rounded-lg">
             <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-[#121F23] mb-4">
               <svg
-                className="w-8 h-8 text-[#3fb950]"
+                className="w-8 h-8 text-[#22c55e]"
                 fill="currentColor"
                 viewBox="0 0 24 24"
               >
@@ -213,7 +206,7 @@ export default function DashboardClient() {
               {searchQuery && (
                 <button
                   onClick={() => setSearchQuery("")}
-                  className="px-6 py-2 bg-[#121F23] hover:bg-[#1f4448] text-[#7fc28e] border border-[#30363d] rounded-lg transition-colors"
+                  className="px-6 py-2 bg-[#121F23] hover:bg-[#1e3a2a] text-[#7fc28e] border border-[#1e3a2a] rounded-lg transition-colors"
                 >
                   Clear Search
                 </button>

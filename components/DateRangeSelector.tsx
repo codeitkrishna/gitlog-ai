@@ -41,7 +41,7 @@ export default function DateRangeSelector({ dateRange, setDateRange }: DateRange
 
   return (
     <div className="mb-6">
-      <label className="block text-sm font-medium text-[#8b949e] mb-3">
+      <label className="block text-sm font-medium text-[#7fc28e] mb-3">
         Date Range
       </label>
 
@@ -57,8 +57,8 @@ export default function DateRangeSelector({ dateRange, setDateRange }: DateRange
             }
             className={`px-3 py-2 text-sm rounded-lg border transition-colors ${
               activePreset === preset.label
-                ? 'bg-[#238636]/20 border-[#238636] text-[#3fb950]'
-                : 'bg-[#0d1117] border-[#30363d] text-[#c9d1d9] hover:border-[#8b949e]'
+                ? 'bg-[#238636]/20 border-[#238636] text-[#22c55e]'
+                : 'bg-[#0d1317] border-[#1e3a2a] text-[#CAFFD6] hover:border-[#7fc28e]'
             }`}
           >
             {preset.label}
@@ -67,22 +67,22 @@ export default function DateRangeSelector({ dateRange, setDateRange }: DateRange
       </div>
 
       {/* Date Range Display — always visible, shows placeholder when empty */}
-      <div className="mb-3 px-3 py-2 bg-[#0d1117] border border-[#30363d] rounded-lg text-sm">
-        <div className="flex items-center gap-2 text-[#c9d1d9]">
-          <svg className="w-4 h-4 text-[#8b949e] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <div className="mb-3 px-3 py-2 bg-[#0d1317] border border-[#1e3a2a] rounded-lg text-sm">
+        <div className="flex items-center gap-2 text-[#CAFFD6]">
+          <svg className="w-4 h-4 text-[#7fc28e] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
           </svg>
           {dateRange.from && dateRange.to ? (
             <span>{format(dateRange.from, 'MMM dd, yyyy')} — {format(dateRange.to, 'MMM dd, yyyy')}</span>
           ) : (
-            <span className="text-[#8b949e]">No date range selected</span>
+            <span className="text-[#7fc28e]">No date range selected</span>
           )}
         </div>
       </div>
 
       {/* Custom Calendar */}
       {showCalendar && (
-        <div className="p-3 sm:p-4 bg-[#0d1117] border border-[#30363d] rounded-lg overflow-x-auto">
+        <div className="p-3 sm:p-4 bg-[#0d1317] border border-[#1e3a2a] rounded-lg overflow-x-auto">
           <DayPicker
             mode="range"
             selected={{ from: dateRange.from || undefined, to: dateRange.to || undefined }}

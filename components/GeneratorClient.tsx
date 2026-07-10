@@ -229,13 +229,7 @@ export default function GeneratorClient({ owner, repo }: GeneratorClientProps) {
 
               {/* Collapsible content */}
               {activePanel === "config" && (
-                <div
-                  className={`transition-all duration-300 ease-in-out overflow-hidden ${
-                    activePanel === "config"
-                      ? "max-h-500 opacity-100"
-                      : "max-h-0 opacity-0"
-                  }`}
-                >
+                <div>
                   <div className="px-5 pb-5 space-y-5">
                     <div className="h-px bg-[#1e3a2a]" />
 
@@ -409,7 +403,7 @@ export default function GeneratorClient({ owner, repo }: GeneratorClientProps) {
                         </label>
 
                         {/* Exclude dependency updates */}
-                        <label className="flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer bg-[#0d1117] border border-[#1e3a2a] hover:border-[#7fc28e] transition-colors">
+                        <label className="flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer bg-[#0d1317] border border-[#1e3a2a] hover:border-[#7fc28e] transition-colors">
                           <div
                             onClick={() => setExcludeDeps(!excludeDeps)}
                             className={`w-4 h-4 rounded border-2 flex items-center justify-center shrink-0 cursor-pointer transition-colors ${
@@ -451,7 +445,7 @@ export default function GeneratorClient({ owner, repo }: GeneratorClientProps) {
                         </label>
 
                         {/* Exclude containing */}
-                        <div className="px-3 py-2.5 rounded-lg bg-[#0d1117] border border-[#1e3a2a]">
+                        <div className="px-3 py-2.5 rounded-lg bg-[#0d1317] border border-[#1e3a2a]">
                           <div className="text-sm text-[#CAFFD6] mb-1.5">
                             Exclude commits containing
                           </div>
@@ -579,13 +573,7 @@ export default function GeneratorClient({ owner, repo }: GeneratorClientProps) {
 
               {/* Collapsible commits content */}
               {activePanel === "commits" && (
-                <div
-                  className={`transition-all duration-300 ease-in-out overflow-hidden ${
-                    activePanel === "commits"
-                      ? "max-h-[2000px] opacity-100"
-                      : "max-h-0 opacity-0"
-                  }`}
-                >
+                <div>
                   {fetchStatus === "idle" && (
                     <div className="px-4 pb-5">
                       <p className="text-xs text-[#7fc28e]">
@@ -665,7 +653,7 @@ export default function GeneratorClient({ owner, repo }: GeneratorClientProps) {
                         </div>
                       </div>
                       {stats.filteredOut > 0 && (
-                        <div className="col-span-2 bg-[#0d1117] rounded-lg px-3 py-2">
+                        <div className="col-span-2 bg-[#0d1317] rounded-lg px-3 py-2">
                           <div className="text-xs text-[#7fc28e]">
                             {stats.filteredOut} commits filtered out by your
                             filters
@@ -678,7 +666,7 @@ export default function GeneratorClient({ owner, repo }: GeneratorClientProps) {
                   {/* Edge case: no commits found */}
                   {fetchStatus === "success" && commits.length === 0 && (
                     <div className="px-4 py-8 text-center">
-                      <div className="w-10 h-10 rounded-full bg-[#0d1117] border border-[#1e3a2a] flex items-center justify-center mx-auto mb-3">
+                      <div className="w-10 h-10 rounded-full bg-[#0d1317] border border-[#1e3a2a] flex items-center justify-center mx-auto mb-3">
                         <svg
                           className="w-5 h-5 text-[#7fc28e]"
                           fill="none"
@@ -936,15 +924,3 @@ export default function GeneratorClient({ owner, repo }: GeneratorClientProps) {
     </div>
   );
 }
-
-// How it works:
-// Page loads
-//   → configCollapsed = false → full config visible, chevron points up
-
-// User fetches commits successfully
-//   → configCollapsed = true → config collapses to just the header
-//   → header shows "X commits loaded" green badge
-//   → chevron points down
-
-// User clicks header
-//   → toggles open/closed manually anytime
